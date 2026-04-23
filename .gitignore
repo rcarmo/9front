@@ -3,3 +3,4 @@ u-boot/
 plan9port/
 images/*.qcow2
 images/*.qcow2.gz
+orangepi-build/
