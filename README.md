@@ -157,3 +157,32 @@ qemu-system-aarch64 -M virt,gic-version=3,highmem-ecam=off \
 
 6. **M5 — SD/eMMC**
    - Allwinner MMC driver for SD card boot
+
+## Port Files
+
+All port-specific code lives in `port/a733/`:
+
+```
+port/a733/
+├── NOTES.md    # Hardware addresses, design decisions, references
+├── a733        # Kernel config (device/driver selection)
+├── dat.h       # Machine-specific data structures
+├── fns.h       # Function declarations
+├── io.h        # I/O and interrupt definitions
+├── main.c      # Board init, memory config, boot sequence
+├── mem.c       # Physical memory setup
+├── mem.h       # Memory map, peripheral base addresses
+├── mkfile      # Build rules
+└── uartaw.c    # Allwinner UART driver (8250-compat, MMIO)
+```
+
+To deploy into a 9front tree for building:
+
+```
+cp port/a733/* /sys/src/9/a733/
+cd /sys/src/9/a733
+mk
+```
+
+Shared arm64 files (`cache.v8.s`, `clock.c`, `fpu.c`, `gic.c`, `l.s`,
+`mmu.c`, `sysreg.c`, `trap.c`) are used directly from `sys/src/9/arm64/`.
