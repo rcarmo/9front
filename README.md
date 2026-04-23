@@ -84,3 +84,49 @@ _Board selection pending._ Candidates should have:
 - Cross-compilation from Linux requires building inside 9front (native toolchain only)
 - The `plan9port` install provides `mk` on the host for scripting/automation
 - Serial console is the primary interface; graphics via `drawterm` connection
+
+## Board Analysis
+
+### Existing 9front ARM64 Ports
+
+| Port | SoC | Board | Files |
+|------|-----|-------|-------|
+| `arm64/qemu` | QEMU virt | Virtual | 12 .c |
+| `bcm64/pi3` | BCM2837 | Raspberry Pi 3 | 12 .c |
+| `bcm64/pi4` | BCM2711 | Raspberry Pi 4 | 12 .c |
+| `imx8/reform` | i.MX8MQ | MNT Reform | 18 .c |
+| `lx2k/honeycomb` | LX2160A | Honeycomb LX2K | 8 .c |
+
+### Recommended Target: Rockchip RK3588
+
+**Why RK3588:**
+- Standard ARM IP blocks → maximum driver reuse from existing ports
+- GICv3, ARM Generic Timer, DesignWare UART/PCIe — all have 9front precedent
+- PCIe 3.0 x4 → NVMe boot via existing `sdnvme` driver
+- USB 3.0 XHCI → existing `usbxhci` driver
+- Excellent TRM documentation (public)
+- Multiple affordable boards: Orange Pi 5 (~$80), Rock 5B (~$100), Radxa ROCK 5A
+
+**Minimal port (~4-6 new files):**
+
+| File | Purpose | Based on |
+|------|---------|----------|
+| `main.c` | Board init, memory map | `arm64/main.c` |
+| `mem.c` | Physical memory layout | `arm64/mem.c` |
+| `pcirk3588.c` | DesignWare PCIe host | `lx2k/pcilx2k.c` |
+| `uartrk.c` | 8250 MMIO UART | `pc/uarti8250.c` |
+| `rk3588` | Kernel config | `arm64/qemu` |
+| `mkfile` | Build rules | `arm64/mkfile` |
+
+**Peripheral compatibility:**
+
+| Peripheral | RK3588 IP | 9front driver | Status |
+|------------|-----------|---------------|--------|
+| Interrupt controller | GICv3 (GIC-600) | `arm64/gic.c` | ✅ Reuse |
+| Timer | ARM Generic Timer | `arm64/clock.c` | ✅ Reuse |
+| UART | Synopsys DW 8250 | `pc/uarti8250.c` | 🔧 Adapt |
+| PCIe | Synopsys DW PCIe | — | 🆕 Write |
+| NVMe | Standard (via PCIe) | `port/sdnvme.c` | ✅ Reuse |
+| USB | DWC3 + XHCI | `usbxhci` | ✅ Reuse |
+| Ethernet | Synopsys GMAC | — | 🆕 Later |
+| SD/eMMC | Synopsys DW MMC | — | 🆕 Later |
