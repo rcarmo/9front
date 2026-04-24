@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+set timeout 300
+log_user 1
+spawn qemu-system-aarch64 \
+    -M virt,gic-version=3,highmem-ecam=off \
+    -cpu cortex-a72 -m 2G -smp 2 \
+    -bios /workspace/projects/9front/images/u-boot.bin \
+    -drive file=/workspace/projects/9front/images/9front-11677.arm64.qcow2,if=none,id=disk0,snapshot=on \
+    -device virtio-blk-pci-non-transitional,drive=disk0 \
+    -drive file=/workspace/projects/9front/images/portdisk.img,if=none,id=portdisk,format=raw \
+    -device virtio-blk-pci-non-transitional,drive=portdisk \
+    -nic user,model=virtio-net-pci-non-transitional \
+    -nographic -serial mon:stdio \
+    -no-reboot
+
+expect -re {bootargs is.*\]}
+send "\r"
+expect -re {user\[.*\]:}
+send "\r"
+
+set timeout 120
+expect "%"
+
+send "dossrv -f /dev/sdG0/data portdisk\r"
+expect "%"
+send "mount -c /srv/portdisk /n/port\r"
+expect "%"
+send "mkdir -p /sys/src/9/a733\r"
+expect "%"
+send "dircp /n/port/a733 /sys/src/9/a733\r"
+expect "%"
+
+send "cd /sys/src/9/a733\r"
+expect "%"
+send "mk\r"
+set timeout 600
+expect {
+    "size 9a733" {}
+    "%" {}
+    timeout { puts "\nBUILD TIMEOUT" }
+}
+expect "%"
+
+# Copy kernel back to port disk
+send "cp 9a733.u /n/port/9a733.u\r"
+expect "%"
+send "cp 9a733 /n/port/9a733\r"
+expect "%"
+send "ls -l /n/port/9a733*\r"
+expect "%"
+
+send "fshalt -r\r"
+set timeout 30
+expect { eof {} timeout {} }

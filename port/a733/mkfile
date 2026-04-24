@@ -59,6 +59,7 @@ OBJ=\
 	$DEVS\
 	$PORT\
 
+
 LIB=\
 	/$objtype/lib/libmemlayer.a\
 	/$objtype/lib/libmemdraw.a\
@@ -101,7 +102,7 @@ rebootcode.$O:	../arm64/rebootcode.s
 init9.$O:	../arm64/init9.s
 	$AS -I. ../arm64/init9.s
 
-# Shared arm64 C (files that exist in ../arm64/, not ../port/)
+# Shared arm64 C
 clock.$O:	../arm64/clock.c
 	$CC $CFLAGS -I. ../arm64/clock.c
 
@@ -114,17 +115,17 @@ gic.$O:	../arm64/gic.c
 mmu.$O:	../arm64/mmu.c
 	$CC $CFLAGS -I. ../arm64/mmu.c
 
-sysreg.$O:	../arm64/sysreg.c
-	$CC $CFLAGS -I. ../arm64/sysreg.c
-
-trap.$O:	../arm64/trap.c
-	$CC $CFLAGS -I. ../arm64/trap.c
-
 mem.$O:	../arm64/mem.c
 	$CC $CFLAGS -I. ../arm64/mem.c
 
 main.$O:	../arm64/main.c
 	$CC $CFLAGS -I. ../arm64/main.c
+
+sysreg.$O:	../arm64/sysreg.c
+	$CC $CFLAGS -I. ../arm64/sysreg.c
+
+trap.$O:	../arm64/trap.c
+	$CC $CFLAGS -I. ../arm64/trap.c
 
 bootargs.$O:	../arm64/bootargs.c
 	$CC $CFLAGS -I. ../arm64/bootargs.c
