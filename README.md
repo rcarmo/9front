@@ -1,188 +1,115 @@
-# 9front ARM64 Port — Orange Pi 4 Pro
+# 9front ARM64 — Orange Pi 4 Pro
 
-Porting [9front](http://9front.org) (Plan 9 from Bell Labs fork) to the [Orange Pi 4 Pro](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-4-Pro.html).
-
-## Target Hardware
-
-### Orange Pi 4 Pro
-
-| Spec | Detail |
-|------|--------|
-| **SoC** | Allwinner A733 (`sun60iw2`) |
-| **Architecture** | ARM64 (AArch64) |
-| **CPU** | 8 cores — 4× Cortex-A76 + 4× Cortex-A55 (big.LITTLE) |
-| **RAM** | 2/4/8/16 GB LPDDR4/5 |
-| **Storage** | eMMC + SD card (Allwinner MMC), PCIe (NVMe), USB 3.0 |
-| **Network** | Gigabit Ethernet (Synopsys GMAC/DWMAC), WiFi (AIC8800) |
-| **USB** | DWC3 + XHCI |
-| **Interrupt Controller** | ARM GICv3 (with ITS) |
-| **Timer** | ARM Generic Timer |
-| **UART** | Allwinner custom (`AW_UART_NG`) — 8250-register-compatible, MMIO |
-| **PCIe** | Allwinner PCIe controller |
-| **GPU** | PowerVR (Imagination Technologies) |
-| **Boot** | Allwinner custom boot0 → U-Boot |
-
-### Vendor BSP
-
-- **Build system:** [orangepi-xunlong/orangepi-build](https://github.com/orangepi-xunlong/orangepi-build)
-- **Board family:** `sun60iw2`
-- **Board config:** `orangepi4pro.conf`
-- **Device tree:** `allwinner/sun60i-a733-orangepi-4-pro.dtb`
-- **Kernel:** Allwinner BSP kernel (5.15 legacy / 6.6 current)
-- **Console:** `ttyS0`
-
-## Project Structure
-
-```
-projects/9front/
-├── src/              # 9front source tree (git mirror)
-├── u-boot/           # U-Boot bootloader (built for QEMU arm64)
-├── plan9port/        # Plan 9 from User Space (mk, etc.)
-├── orangepi-build/   # Vendor BSP/build system (reference)
-├── images/           # Boot images
-│   ├── u-boot.bin          # U-Boot firmware for QEMU
-│   └── 9front-11677.arm64.qcow2  # Pre-built 9front arm64 image
-├── boot.sh           # QEMU boot script
-└── README.md
-```
-
-## Build Chain Status
-
-| Component | Status |
-|-----------|--------|
-| 9front source tree | ✅ Cloned (`src/`) |
-| U-Boot arm64 QEMU firmware | ✅ Built (`images/u-boot.bin`) |
-| 9front arm64 QCOW2 image | ✅ Downloaded (rev 11677) |
-| QEMU boot (serial console) | ✅ Verified — boots to `rc` shell |
-| Plan 9 C compiler (`7c`) | ✅ Works inside 9front |
-| Plan 9 linker (`7l`) | ✅ Works inside 9front |
-| Kernel build (`mk`) | ✅ Builds `9qemu` from source |
-| plan9port (host tools) | ✅ Built (`mk` available on host) |
-| Orange Pi vendor BSP | ✅ Cloned (`orangepi-build/`) |
+Porting [9front](http://9front.org) to the [Orange Pi 4 Pro](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-4-Pro.html) (Allwinner A733).
 
 ## Quick Start
 
-### Boot 9front in QEMU (arm64)
-
 ```sh
-./boot.sh              # snapshot mode (no disk changes)
-./boot.sh persistent   # writes survive reboot
+make help          # show available targets
+make kernel        # build kernel (boots QEMU, compiles, extracts)
+make sdcard        # build bootable SD card image
 ```
 
-At `bootargs` prompt → Enter. At `user[glenda]:` → Enter.
-
-### Build the arm64 kernel inside 9front
-
-```
-cd /sys/src/9/arm64
-mk
+Flash to SD card:
+```sh
+sudo dd if=images/sdcard.img of=/dev/sdX bs=1M status=progress
 ```
 
-Produces `9qemu` (raw kernel) and `9qemu.u` (U-Boot uImage).
+## Build Targets
 
-## QEMU Configuration
+| Target | Description |
+|--------|-------------|
+| `make portdisk` | Pack `port/a733/` into FAT image for QEMU transfer |
+| `make kernel` | Build kernel inside 9front QEMU (automated) |
+| `make sdcard` | Build bootable SD card image (64MB) |
+| `make boot` | Boot 9front QEMU (snapshot mode) |
+| `make dev` | Boot QEMU with port disk attached (interactive) |
+| `make clean` | Remove build artifacts |
 
-```
-qemu-system-aarch64 -M virt,gic-version=3,highmem-ecam=off \
-    -cpu cortex-a72 -m 2G -smp 2 \
-    -bios u-boot.bin \
-    -drive file=9front.arm64.qcow2,if=none,id=disk0 \
-    -device virtio-blk-pci-non-transitional,drive=disk0 \
-    -nographic -serial mon:stdio
-```
+## SD Card Image Layout
 
-## Port Plan
+| Offset | Content |
+|--------|---------|
+| 8 KiB | `boot0` — Allwinner SPL (loads U-Boot) |
+| 16.8 MiB | `boot_package` — U-Boot + monitor + SCP firmware |
+| 32 MiB | FAT32 partition — `9a733.u` (kernel) + `boot.scr` |
 
-### Existing 9front ARM64 Ports (reference)
+## Target Hardware
 
-| Port | SoC | Board | Board-specific files |
-|------|-----|-------|---------------------|
-| `arm64/qemu` | QEMU virt | Virtual | 12 .c |
-| `bcm64/pi3` | BCM2837 | Raspberry Pi 3 | 12 .c |
-| `bcm64/pi4` | BCM2711 | Raspberry Pi 4 | 12 .c |
-| `imx8/reform` | i.MX8MQ | MNT Reform | 18 .c |
-| `lx2k/honeycomb` | LX2160A | Honeycomb LX2K | 8 .c |
-
-**Note:** No existing Allwinner/sunxi support in 9front. This is a fresh port.
-
-### Peripheral Compatibility
-
-| Peripheral | A733 IP Block | 9front driver | Status |
-|------------|--------------|---------------|--------|
-| Interrupt controller | ARM GICv3 | `arm64/gic.c` | ✅ Reuse |
-| Timer | ARM Generic Timer | `arm64/clock.c` | ✅ Reuse |
-| UART | Allwinner UART (8250-compat) | `pc/uarti8250.c` | 🔧 Adapt to MMIO |
-| USB | DWC3 + XHCI | `usbxhci` | ✅ Reuse |
-| NVMe | Standard (via PCIe) | `port/sdnvme.c` | ✅ Reuse |
-| PCIe | Allwinner PCIe host | — | 🆕 Write |
-| Ethernet | Synopsys GMAC (DWMAC) | — | 🆕 Write |
-| SD/eMMC | Allwinner MMC | — | 🆕 Write |
-| VirtIO (QEMU testing) | Standard | `port/sdvirtio10.c` | ✅ Reuse |
-
-### New Files Needed (~5-8)
-
-| File | Purpose | Reference |
-|------|---------|-----------|
-| `main.c` | Board init, memory map | `arm64/main.c` + `lx2k/main.c` |
-| `mem.c` / `mem.h` | Physical memory layout | `arm64/mem.c` |
-| `dat.h` / `fns.h` / `io.h` | Board-specific types & declarations | `lx2k/dat.h` |
-| `uartaw.c` | Allwinner UART (8250-register-compat, MMIO) | `pc/uarti8250.c` |
-| `pciaw.c` | Allwinner PCIe host controller | `lx2k/pcilx2k.c` |
-| `a733` | Kernel config file | `arm64/qemu` |
-| `mkfile` | Build rules | `arm64/mkfile` |
-
-### Milestone Plan
-
-1. **M0 — QEMU baseline** ✅
-   - Boot pre-built 9front arm64 in QEMU
-   - Build kernel from source inside 9front
-
-2. **M1 — UART + serial console**
-   - Write `uartaw.c` (Allwinner UART driver)
-   - Boot custom kernel in QEMU with Allwinner UART emulation
-   - Get serial console output
-
-3. **M2 — Minimal hardware boot**
-   - Board init (`main.c`, `mem.c`)
-   - GICv3 + timer (reuse from `arm64/`)
-   - Boot to `rc` shell on real hardware via serial
-
-4. **M3 — Storage**
-   - PCIe host controller (`pciaw.c`)
-   - Boot from NVMe or USB storage
-
-5. **M4 — Network**
-   - Ethernet driver (Synopsys GMAC)
-   - Network boot / TCP/IP
-
-6. **M5 — SD/eMMC**
-   - Allwinner MMC driver for SD card boot
+| | |
+|---|---|
+| **SoC** | Allwinner A733 (`sun60iw2`) |
+| **CPU** | 8-core ARM64 — 4× Cortex-A76 + 4× Cortex-A55 |
+| **RAM** | 2/4/8/16 GB LPDDR |
+| **Storage** | eMMC, SD, PCIe (NVMe), USB 3.0 |
+| **Network** | GbE (Synopsys GMAC), WiFi (AIC8800) |
+| **Display** | HDMI, eDP, DSI, LVDS |
+| **Console** | UART0 at `0x02500000` (ttyS0, 115200) |
 
 ## Port Files
 
-All port-specific code lives in `port/a733/`:
-
 ```
 port/a733/
-├── NOTES.md    # Hardware addresses, design decisions, references
-├── a733        # Kernel config (device/driver selection)
-├── dat.h       # Machine-specific data structures
-├── fns.h       # Function declarations
+├── NOTES.md    # Hardware addresses, design decisions
+├── a733        # Kernel config
+├── dat.h       # Data structures (from arm64/)
+├── fns.h       # Function declarations (from arm64/)
 ├── io.h        # I/O and interrupt definitions
-├── main.c      # Board init, memory config, boot sequence
-├── mem.c       # Physical memory setup
-├── mem.h       # Memory map, peripheral base addresses
-├── mkfile      # Build rules
+├── lcd.c       # Display init (WIP — inherits U-Boot framebuffer)
+├── mem.h       # Memory map (arm64/ + A733 peripheral addresses)
+├── mkfile      # Build rules (references ../arm64/ for shared code)
+├── pciaw.c     # PCIe host controller stub
+├── screen.c    # Framebuffer console (WIP)
+├── screen.h    # Screen declarations
 └── uartaw.c    # Allwinner UART driver (8250-compat, MMIO)
 ```
 
-To deploy into a 9front tree for building:
+Shared arm64 code reused from `sys/src/9/arm64/`:
+`l.s`, `cache.v8.s`, `clock.c`, `fpu.c`, `gic.c`, `main.c`,
+`mem.c`, `mmu.c`, `sysreg.c`, `trap.c`, `bootargs.c`
 
-```
-cp port/a733/* /sys/src/9/a733/
-cd /sys/src/9/a733
-mk
-```
+## Development Workflow
 
-Shared arm64 files (`cache.v8.s`, `clock.c`, `fpu.c`, `gic.c`, `l.s`,
-`mmu.c`, `sysreg.c`, `trap.c`) are used directly from `sys/src/9/arm64/`.
+1. Edit files in `port/a733/` on the host
+2. `make portdisk` — packs into FAT image
+3. `make dev` — boots QEMU with port disk attached
+4. Inside 9front:
+   ```
+   dossrv -f /dev/sdG0/data portdisk
+   mount -c /srv/portdisk /n/port
+   dircp /n/port/a733 /sys/src/9/a733
+   cd /sys/src/9/a733 && mk
+   ```
+5. Or: `make kernel` to automate steps 2–4 + extract
+
+## Prerequisites
+
+- QEMU (`qemu-system-aarch64`)
+- mtools (`mcopy`, `mformat`, `mdir`)
+- expect (`expect`)
+- mkimage (`u-boot-tools`)
+- qemu-user-static (for building vendor U-Boot boot blobs)
+- ARM cross-compiler (`gcc-arm-linux-gnueabi`, for vendor U-Boot only)
+
+Pre-built boot blobs are included in `images/`.
+
+## Peripheral Status
+
+| Peripheral | Driver | Status |
+|------------|--------|--------|
+| GICv3 | `arm64/gic.c` | ✅ Reused |
+| ARM Timer | `arm64/clock.c` | ✅ Reused |
+| UART (serial) | `uartaw.c` | ✅ Written |
+| PCIe | `pciaw.c` | 🔧 Stub (DesignWare init needed) |
+| Framebuffer | `screen.c` + `lcd.c` | 🔧 Written, not yet in config |
+| NVMe | `port/sdnvme.c` | ⏳ Needs PCIe |
+| USB XHCI | `port/usbxhci.c` | ⏳ Needs testing |
+| Ethernet | — | 🆕 Not started (Synopsys GMAC) |
+| SD/eMMC | — | 🆕 Not started (Allwinner MMC) |
+
+## Vendor Resources
+
+- **BSP:** [orangepi-xunlong/orangepi-build](https://github.com/orangepi-xunlong/orangepi-build)
+- **U-Boot fork:** `v2018.05-sun60iw2` branch on gitee
+- **Board config:** `orangepi4pro.conf` → `sun60iw2` family
+- **DTB:** `allwinner/sun60i-a733-orangepi-4-pro.dtb`
