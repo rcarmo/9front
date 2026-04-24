@@ -10,12 +10,6 @@
 #include <cursor.h>
 #include "screen.h"
 
-typedef struct Cursor Cursor;
-extern void swcursorhide(int);
-extern void swcursoravoid(Rectangle);
-extern void swcursordraw(Point);
-extern void swcursorload(Cursor*);
-extern void swcursorinit(void);
 
 Memimage *gscreen;
 
@@ -152,14 +146,16 @@ setcolor(ulong, ulong, ulong, ulong)
 }
 
 Memdata*
-attachscreen(Rectangle *r, ulong *d, int *width, ulong *chan)
+attachscreen(Rectangle *r, ulong *chan, int *d, int *width, int *softscreen)
 {
 	if(gscreen == nil)
 		return nil;
 	*r = gscreen->r;
-	*d = gscreen->depth;
 	*chan = gscreen->chan;
+	*d = gscreen->depth;
 	*width = gscreen->width;
+	if(softscreen)
+		*softscreen = 1;
 	gscreen->data->ref++;
 	return gscreen->data;
 }
