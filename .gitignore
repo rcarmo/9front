@@ -1,7 +1,11 @@
 src/
 u-boot/
+u-boot-aw/
 plan9port/
 orangepi-build/
 images/*.qcow2
 images/*.qcow2.gz
 images/portdisk.img
+images/sdcard.img
+images/9a733
+images/9a733.u
