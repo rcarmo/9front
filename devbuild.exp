@@ -1,0 +1,67 @@
+#!/usr/bin/expect -f
+#
+# Boot 9front, mount port disk, deploy files, build kernel.
+# Usage: expect devbuild.exp
+#
+set timeout 300
+log_user 1
+
+set script_dir [file dirname [file normalize [info script]]]
+
+spawn bash -c "$script_dir/boot.sh dev"
+
+# Wait for bootargs prompt and accept default
+expect -re {bootargs is.*\]}
+send "\r"
+
+# Wait for user prompt
+expect -re {user\[.*\]:}
+send "\r"
+
+# Wait for rc shell
+set timeout 180
+expect "%"
+
+# Mount the port disk (second virtio drive = sdF1)
+send "ls /dev/sdF1\r"
+expect "%"
+
+send "dossrv -f /dev/sdF1/data portdisk\r"
+expect "%"
+
+send "mount /srv/portdisk /n/port\r"
+expect "%"
+
+send "ls /n/port/a733\r"
+expect "%"
+
+# Create target directory and deploy files
+send "mkdir -p /sys/src/9/a733\r"
+expect "%"
+
+send "cp /n/port/a733/* /sys/src/9/a733/\r"
+expect "%"
+
+send "ls /sys/src/9/a733/\r"
+expect "%"
+
+# Attempt kernel build
+send "cd /sys/src/9/a733\r"
+expect "%"
+
+send "mk\r"
+set timeout 600
+expect {
+    "mk: " { exp_continue }
+    "%" {}
+    timeout { puts "\nTIMEOUT during kernel build" }
+}
+
+# Check result
+send "ls -l 9a733 9a733.u\r"
+expect "%"
+
+# Interactive mode — hand over to user
+puts "\n\n=== BUILD COMPLETE — dropping to interactive shell ==="
+puts "Type 'fshalt' to shut down, or continue working.\n"
+interact
