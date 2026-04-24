@@ -4,3 +4,4 @@ plan9port/
 orangepi-build/
 images/*.qcow2
 images/*.qcow2.gz
+images/portdisk.img

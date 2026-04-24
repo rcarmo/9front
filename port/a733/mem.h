@@ -1,98 +1,162 @@
 /*
  * Memory and machine-specific definitions.  Used in C and assembler.
- *
- * Allwinner A733 (sun60iw2) - Orange Pi 4 Pro
  */
 #define KiB		1024u			/* Kibi 0x0000000000000400 */
 #define MiB		1048576u		/* Mebi 0x0000000000100000 */
 #define GiB		1073741824u		/* Gibi 000000000040000000 */
 
 /*
- * Sizes
+ * Sizes:
+ * 	L0	L1	L2	L3
+ *	4K	2M	1G	512G
+ *	16K	32M	64G	128T
+ *	64K	512M	4T	-
  */
-#define	BY2PG		(4*KiB)			/* bytes per page */
-#define	BY2SE		(2*MiB)			/* bytes per section */
-#define	PGSHIFT		12			/* log(BY2PG) */
-#define	SESHIFT		21			/* log(BY2SE) */
-#define	PGROUND(s)	ROUND(s, BY2PG)
+#define	PGSHIFT		12		/* log(BY2PG) */
+#define	BY2PG		(1ULL<<PGSHIFT)	/* bytes per page */
 #define	ROUND(s, sz)	(((s)+(sz-1))&~(sz-1))
+#define	PGROUND(s)	ROUND(s, BY2PG)
 
-#define	MAXMACH		8			/* max cpus */
+/* effective virtual address space */
+#define EVASHIFT	36
+#define EVAMASK		((1ULL<<EVASHIFT)-1)
+
+#define PTSHIFT		(PGSHIFT-3)
+#define PTLEVELS	(((EVASHIFT-PGSHIFT)+PTSHIFT-1)/PTSHIFT)	
+#define PTLX(v, l)	((((v) & EVAMASK) >> (PGSHIFT + (l)*PTSHIFT)) & ((1 << PTSHIFT)-1))
+#define PGLSZ(l)	(1ULL << (PGSHIFT + (l)*PTSHIFT))
+
+#define PTL1X(v, l)	(L1TABLEX(v, l) | PTLX(v, l))
+#define L1TABLEX(v, l)	(L1TABLE(v, l) << PTSHIFT)
+#define L1TABLES	((-KSEG0+PGLSZ(2)-1)/PGLSZ(2))
+#define L1TABLE(v, l)	(L1TABLES - ((PTLX(v, 2) % L1TABLES) >> (((l)-1)*PTSHIFT)) + (l)-1)
+#define L1TOPSIZE	(1ULL << (EVASHIFT - PTLEVELS*PTSHIFT))
+
+#define	MAXMACH		16			/* max # cpus system can run */
 #define	MACHSIZE	(8*KiB)
 
+#define KSTACK		(8*KiB)
+#define STACKALIGN(sp)	((sp) & ~7)		/* bug: assure with alloc */
+#define TRAPFRAMESIZE	(38*8)
+
+#define DTBADDR		0x40000000
+
+#define VDRAM		(0xFFFFFFFFC0000000ULL)	/* 0x40000000 - 0x80000000 */
+#define	KTZERO		(VDRAM + 0x100000)	/* 0x40100000 - kernel text start */
+
+#define PHYSIO		0x8000000
+#define PHYSIOEND	0x10000000
+
+#define	VIRTIO		(0xFFFFFFFFB0000000ULL)
+
+#define	KZERO		(0xFFFFFFFF80000000ULL)	/* 0x00000000 - kernel address space */
+
+#define VMAP		(0xFFFFFFFF00000000ULL)	/* 0x00000000 - 0x40000000 */
+
+#define KMAPEND		(0xFFFFFFFF00000000ULL)	/* 0x140000000 */
+#define KMAP		(0xFFFFFFFE00000000ULL)	/*  0x40000000 */
+
+#define KLIMIT		(VDRAM - KZERO + KMAPEND - KMAP)	/* 0x140000000 */
+
+#define KSEG0		(0xFFFFFFFE00000000ULL)
+
+/* temporary identity map for TTBR0 (using only top-level) */
+#define L1BOT		((L1-L1TOPSIZE)&-BY2PG)
+
+/* shared kernel page table for TTBR1 */
+#define L1		(L1TOP-L1SIZE)
+#define L1SIZE		((L1TABLES+PTLEVELS-2)*BY2PG)
+#define L1TOP		((MACHADDR(MAXMACH-1)-L1TOPSIZE)&-BY2PG)
+
+#define MACHADDR(n)	(KTZERO-((n)+1)*MACHSIZE)
+
+#define CONFADDR	(VDRAM + 0x10000)	/* 0x40010000 */
+
+#define BOOTARGS	((char*)CONFADDR)
+#define BOOTARGSLEN	0x10000
+
+#define	REBOOTADDR	(VDRAM-KZERO + 0x20000)	/* 0x40020000 */
+
+#define	UZERO		0ULL			/* user segment */
+#define	UTZERO		(UZERO+0x10000)		/* user text start */
+#define	USTKTOP		((EVAMASK>>1)-0xFFFF)	/* user segment end +1 */
+#define	USTKSIZE	(16*1024*1024)		/* user stack size */
+
+#define BLOCKALIGN	64			/* only used in allocb.c */
+
 /*
- * Address space layout
- *
- * The Allwinner A733 boots with DRAM at 0x40000000.
- * Peripherals are mapped at 0x02000000-0x07ffffff.
- *
- * Virtual memory layout (from arm64/mem.h):
- *   KZERO is where the kernel virtual address space starts
- *   Physical memory is mapped at KZERO + physical address
+ * Sizes
  */
-#define KZERO		0xFFFFFFFF80000000ULL	/* kernel address space */
-#define KDZERO		0xFFFFFFFF80000000ULL	/* kernel data space */
+#define BI2BY		8			/* bits per byte */
+#define BY2SE		4
+#define BY2WD		8
+#define BY2V		8			/* only used in xalloc.c */
 
-#define UZERO		0x0ULL			/* user space starts */
-#define UTZERO		(UZERO+0x10000)		/* user text start */
-#define USTKTOP		0x0000007FC0000000ULL	/* user stack top */
-#define USTKSIZE	(16*1024*1024)		/* user stack size */
-
-#define KSEG0		0xFFFFFFFF00000000ULL	/* cached, unmapped */
-#define VDMA		0xFFFFFFFE00000000ULL	/* uncached, unmapped (device I/O) */
-
-#define	VIRTIO		0xFFFFFFFE00000000ULL	/* device mappings (virtual) */
-
-/*
- * Physical memory
- */
-#define	PHYSDRAM	0x40000000		/* DRAM base */
-
-/*
- * Allwinner A733 peripheral base addresses
- */
-#define	UART0		0x02500000		/* UART0 (debug console) */
-#define	UART1		0x02501000
-#define	UART2		0x02502000
-
-#define	GICD		0x03400000		/* GIC Distributor */
-#define	GICR		0x03460000		/* GIC Redistributor */
-
-#define	PCIE		0x06000000		/* PCIe DBI base */
-
-#define	GMAC0		0x04500000		/* Ethernet MAC 0 */
-#define	GMAC1		0x04510000		/* Ethernet MAC 1 */
-
-#define	XHCI		0x06A00000		/* USB3 XHCI */
-
-/*
- * MMU
- */
-#define	PTEPERTAB	(512)
-
-#define	PTEMAPMEM	(PTEPERTAB*BY2PG)
-#define	PTEPERTAB	(512)
+#define	PTEMAPMEM	(1024*1024)
+#define	PTEPERTAB	(PTEMAPMEM/BY2PG)
 #define	SEGMAPSIZE	8192
 #define	SSEGMAPSIZE	16
+#define	PPN(x)		((x)&~(BY2PG-1))
 
-#define	L1SIZE		(PTEPERTAB*8)	/* 4096 */
-#define	L1TABLEX	(L1SIZE/BY2PG)
-#define	L1TABLE		(4*BY2PG)
-#define	L1TABLES	4
+#define SHARE_NONE	0
+#define SHARE_OUTER	2
+#define SHARE_INNER	3
+
+#define CACHE_UC	0
+#define CACHE_WB	1
+#define CACHE_WT	2
+#define CACHE_WB_NA	3
+
+#define MA_MEM_WB	0
+#define MA_MEM_WT	1
+#define MA_MEM_UC	2
+#define MA_DEV_nGnRnE	3
+#define MA_DEV_nGnRE	4
+#define MA_DEV_nGRE	5
+#define MA_DEV_GRE	6
+
+#define	PTEVALID	1
+#define PTEBLOCK	0
+#define PTETABLE	2
+#define PTEPAGE		2
+
+#define PTEMA(x)	((x)<<2)
+#define PTEAP(x)	((x)<<6)
+#define PTESH(x)	((x)<<8)
+
+#define PTEAF		(1<<10)
+#define PTENG		(1<<11)
+#define PTEPXN		(1ULL<<53)
+#define PTEUXN		(1ULL<<54)
+
+#define PTEKERNEL	PTEAP(0)
+#define PTEUSER		PTEAP(1)
+#define PTEWRITE	PTEAP(0)
+#define PTERONLY	PTEAP(2)
+#define PTENOEXEC	(PTEPXN|PTEUXN)
+
+#define PTECACHED	PTEMA(MA_MEM_WB)
+#define PTEWT		PTEMA(MA_MEM_WT)
+#define PTEUNCACHED	PTEMA(MA_MEM_UC)
+#define PTEDEVICE	PTEMA(MA_DEV_nGnRE)
 
 /*
- * Magic registers
+ * Physical machine information from here on.
+ *	PHYS addresses as seen from the arm cpu.
+ *	BUS  addresses as seen from peripherals
  */
-#define	CNTFRQ		0			/* timer frequency (set at runtime) */
+#define	PHYSDRAM	0x40000000
+
+#define MIN(a, b)	((a) < (b)? (a): (b))
+#define MAX(a, b)	((a) > (b)? (a): (b))
 
 /*
- * PSR bits
+ * Allwinner A733 (Orange Pi 4 Pro) peripheral addresses
  */
-#define PsrDirq		(1<<9)		/* Disable IRQ */
-#define PsrDfiq		(1<<8)		/* Disable FIQ */
-#define PsrA		(1<<7)		/* Disable imprecise abort */
-#define PsrMel0t	0x0		/* EL0, SP_EL0, Aarch64 */
-#define PsrMel1t	0x4		/* EL1, SP_EL0, Aarch64 */
-#define PsrMel1h	0x5		/* EL1, SP_EL1, Aarch64 */
-#define PsrMel2t	0x8		/* EL2, SP_EL2, Aarch64 */
-#define PsrMel2h	0x9		/* EL2, SP_EL2, Aarch64 */
+#define	UART0		0x02500000
+#define	UART1		0x02501000
+#define	GICD		0x03400000
+#define	GICR		0x03460000
+#define	PCIE		0x06000000
+#define	GMAC0		0x04500000
+#define	XHCI		0x06A00000

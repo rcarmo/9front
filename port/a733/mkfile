@@ -39,6 +39,7 @@ PORT=\
 	tod.$O\
 	xalloc.$O\
 	userinit.$O\
+	random.$O\
 
 OBJ=\
 	l.$O\
@@ -49,9 +50,10 @@ OBJ=\
 	mmu.$O\
 	mem.$O\
 	sysreg.$O\
-	random.$O\
 	trap.$O\
 	bootargs.$O\
+	uartaw.$O\
+	pciaw.$O\
 	$CONF.root.$O\
 	$CONF.rootc.$O\
 	$DEVS\
@@ -85,6 +87,47 @@ install:V: /$objtype/$p$CONF
 <../boot/bootmkfile
 <../port/portmkfile
 <|../port/mkbootrules $CONF
+
+# Shared arm64 assembly
+l.$O:	../arm64/l.s
+	$AS -I. ../arm64/l.s
+
+cache.v8.$O:	../arm64/cache.v8.s
+	$AS -I. ../arm64/cache.v8.s
+
+rebootcode.$O:	../arm64/rebootcode.s
+	$AS -I. ../arm64/rebootcode.s
+
+init9.$O:	../arm64/init9.s
+	$AS -I. ../arm64/init9.s
+
+# Shared arm64 C (files that exist in ../arm64/, not ../port/)
+clock.$O:	../arm64/clock.c
+	$CC $CFLAGS -I. ../arm64/clock.c
+
+fpu.$O:	../arm64/fpu.c
+	$CC $CFLAGS -I. ../arm64/fpu.c
+
+gic.$O:	../arm64/gic.c
+	$CC $CFLAGS -I. ../arm64/gic.c
+
+mmu.$O:	../arm64/mmu.c
+	$CC $CFLAGS -I. ../arm64/mmu.c
+
+sysreg.$O:	../arm64/sysreg.c
+	$CC $CFLAGS -I. ../arm64/sysreg.c
+
+trap.$O:	../arm64/trap.c
+	$CC $CFLAGS -I. ../arm64/trap.c
+
+mem.$O:	../arm64/mem.c
+	$CC $CFLAGS -I. ../arm64/mem.c
+
+main.$O:	../arm64/main.c
+	$CC $CFLAGS -I. ../arm64/main.c
+
+bootargs.$O:	../arm64/bootargs.c
+	$CC $CFLAGS -I. ../arm64/bootargs.c
 
 main.$O: rebootcode.i
 

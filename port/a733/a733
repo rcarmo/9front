@@ -16,18 +16,16 @@ dev
 	bridge	log
 	ip	arp chandial ip ipv6 ipaux iproute netlog nullmedium pktmedium inferno
 	uart
-	usb
-	rtc
 	pci	pci
 	sd
 
 link
-	usbxhcipci	pci usbxhci
 	ethervirtio10	pci virtio10mem
 	ethersink
 	ethermedium
 	loopbackmedium
 	netdevmedium
+	pciaw		pci
 
 ip
 	tcp
@@ -42,7 +40,6 @@ ip
 misc
 	gic
 	uartaw
-	sdnvme		pci
 	sdvirtio10	pci sdscsi virtio10mem
 
 port
