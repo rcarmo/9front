@@ -221,3 +221,10 @@ struct DevConf
 	int	nports;			/* Number of ports */
 	Devport	*ports;			/* The ports themselves */
 };
+
+/*
+ * Forward declaration for cursor.h (struct Cursor needs typedef
+ * because 9front cc does not auto-typedef struct tags).
+ */
+typedef struct Cursor Cursor;
+

@@ -18,6 +18,8 @@ dev
 	uart
 	pci	pci
 	sd
+	draw	screen swcursor
+	mouse	screen swcursor
 
 link
 	ethervirtio10	pci virtio10mem
@@ -40,6 +42,7 @@ ip
 misc
 	gic
 	uartaw
+	lcd
 	sdvirtio10	pci sdscsi virtio10mem
 
 port

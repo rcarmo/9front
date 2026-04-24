@@ -54,6 +54,8 @@ OBJ=\
 	bootargs.$O\
 	uartaw.$O\
 	pciaw.$O\
+	screen.$O\
+	lcd.$O\
 	$CONF.root.$O\
 	$CONF.rootc.$O\
 	$DEVS\
