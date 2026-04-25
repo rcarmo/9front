@@ -15,7 +15,8 @@
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-IMAGES="$SCRIPT_DIR/images"
+BOARD="${BOARD:-orangepi4pro}"
+IMAGES="$SCRIPT_DIR/images/$BOARD"
 BIOS="$IMAGES/u-boot.bin"
 DISK="$IMAGES/9front-11677.arm64.qcow2"
 PORTDISK="$IMAGES/portdisk.img"

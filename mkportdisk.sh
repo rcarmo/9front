@@ -2,9 +2,11 @@
 # Pack port/a733/ into a FAT disk image for transfer to 9front QEMU.
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BOARD="${BOARD:-orangepi4pro}"
 PORT="$SCRIPT_DIR/port/a733"
-IMG="$SCRIPT_DIR/images/portdisk.img"
+IMG="$SCRIPT_DIR/images/$BOARD/portdisk.img"
 
+mkdir -p "$(dirname "$IMG")"
 dd if=/dev/zero of="$IMG" bs=1M count=16 status=none
 mformat -i "$IMG" -F ::
 mmd -i "$IMG" ::/a733

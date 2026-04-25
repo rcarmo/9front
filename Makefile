@@ -8,10 +8,13 @@
 #   make dev         - boot QEMU in dev mode (port disk attached)
 #   make clean       - remove built artifacts
 
-IMAGES  = images
+BOARD   = orangepi4pro
+IMAGES  = images/$(BOARD)
 PORT    = port/a733
 PORTIMG = $(IMAGES)/portdisk.img
 KERNEL  = $(IMAGES)/9a733.u
+RAWKERN = $(IMAGES)/9a733.k
+BOOTIMG = $(IMAGES)/9a733.img
 SDCARD  = $(IMAGES)/sdcard.img
 
 .PHONY: portdisk kernel sdcard boot dev clean help
@@ -54,5 +57,5 @@ dev: $(PORTIMG)
 	./boot.sh dev
 
 clean:
-	rm -f $(PORTIMG) $(KERNEL) $(IMAGES)/9a733 $(SDCARD)
+	rm -f $(PORTIMG) $(KERNEL) $(RAWKERN) $(BOOTIMG) $(IMAGES)/9a733 $(SDCARD)
 	@echo "Cleaned build artifacts"
