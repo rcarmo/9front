@@ -12,10 +12,17 @@
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BOOT0="$SCRIPT_DIR/orangepi-build/external/packages/pack-uboot/sun60iw2/bin/boot0_sdcard_a733.fex"
-BOOTPKG="$SCRIPT_DIR/images/boot_package.fex"
+VENDOR_BOOT_DIR="$SCRIPT_DIR/images/orangepi-debian-1.0.6"
+BOOT0="${BOOT0:-$VENDOR_BOOT_DIR/extracted/boot0_sdcard_exact.fex}"
+BOOTPKG="${BOOTPKG:-$VENDOR_BOOT_DIR/extracted/boot_package_exact.fex}"
+DTB="${DTB:-$VENDOR_BOOT_DIR/boot/dtb/allwinner/sun60i-a733-orangepi-4-pro.dtb}"
 IMG="$SCRIPT_DIR/images/sdcard.img"
 KERNEL="${1:-$SCRIPT_DIR/images/9a733.u}"
+RAWKERNEL="$SCRIPT_DIR/images/9a733.k"
+BOOTIKERNEL="$SCRIPT_DIR/images/9a733.img"
+
+[ -f "$BOOT0" ] || BOOT0="$SCRIPT_DIR/orangepi-build/external/packages/pack-uboot/sun60iw2/bin/boot0_sdcard_a733.fex"
+[ -f "$BOOTPKG" ] || BOOTPKG="$SCRIPT_DIR/images/boot_package.fex"
 
 if [ ! -f "$BOOT0" ]; then
     echo "Missing boot0: $BOOT0"
@@ -31,8 +38,37 @@ if [ ! -f "$KERNEL" ]; then
     echo "Build the kernel first, or pass path as argument."
     exit 1
 fi
+if [ ! -f "$DTB" ]; then
+    echo "Missing DTB: $DTB"
+    exit 1
+fi
 
 echo "=== Building SD card image ==="
+echo "  boot0 source: $BOOT0"
+echo "  boot_package source: $BOOTPKG"
+echo "  dtb source: $DTB"
+
+tail -c +65 "$KERNEL" > "$RAWKERNEL"
+python3 - "$RAWKERNEL" "$BOOTIKERNEL" <<'PY'
+import struct, sys
+src, dst = sys.argv[1], sys.argv[2]
+payload = open(src, 'rb').read()
+# Minimal AArch64 Linux Image header so U-Boot booti will enter AArch64 and branch
+# to the real 9front kernel placed immediately after the 64-byte header.
+# code0 = NOP, code1 = B +0x3c (from offset 4 -> 0x40)
+header = bytearray()
+header += struct.pack('<I', 0xD503201F)
+header += struct.pack('<I', 0x1400000F)
+header += struct.pack('<Q', 0)
+header += struct.pack('<Q', len(payload) + 64)
+header += struct.pack('<Q', 0xA)
+header += struct.pack('<Q', 0)
+header += struct.pack('<Q', 0)
+header += struct.pack('<Q', 0)
+header += struct.pack('<I', 0x644D5241)
+header += struct.pack('<I', 0)
+open(dst, 'wb').write(header + payload)
+PY
 
 # Create 64MB image
 dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
@@ -59,14 +95,18 @@ FATSZ=$(( $(stat -c%s "$IMG") - $FATOFF ))
 dd if="$IMG" of="$IMG.fat" bs=512 skip=65536 count=$(( $FATSZ / 512 )) status=none
 mkfs.vfat -F 32 -n PLAN9BOOT "$IMG.fat"
 
-# Copy kernel and boot script to FAT partition
+# Copy kernel payloads and DTB to FAT partition
 mcopy -i "$IMG.fat" "$KERNEL" ::/9a733.u
+mcopy -i "$IMG.fat" "$RAWKERNEL" ::/9a733.k
+mcopy -i "$IMG.fat" "$BOOTIKERNEL" ::/9a733.img
+mcopy -i "$IMG.fat" "$DTB" ::/sun60i-a733-orangepi-4-pro.dtb
 
 # Create U-Boot boot script
 cat > /tmp/boot.cmd << 'BOOTCMD'
 echo "=== 9front Orange Pi 4 Pro ==="
-fatload ${devtype} ${devnum}:1 0x43100000 9a733.u
-bootm 0x43100000
+fatload ${devtype} ${devnum}:1 0x40000000 sun60i-a733-orangepi-4-pro.dtb
+fatload ${devtype} ${devnum}:1 0x400fffc0 9a733.img
+booti 0x400fffc0 - 0x40000000
 BOOTCMD
 mkimage -C none -A arm64 -T script -d /tmp/boot.cmd /tmp/boot.scr 2>/dev/null || true
 if [ -f /tmp/boot.scr ]; then
@@ -78,7 +118,10 @@ fi
 dd if="$IMG.fat" of="$IMG" bs=512 seek=65536 conv=notrunc status=none
 rm -f "$IMG.fat"
 
-echo "  kernel: $(stat -c%s "$KERNEL") bytes as 9a733.u"
+echo "  kernel wrapper: $(stat -c%s "$KERNEL") bytes as 9a733.u"
+echo "  kernel raw: $(stat -c%s "$RAWKERNEL") bytes as 9a733.k"
+echo "  kernel booti: $(stat -c%s "$BOOTIKERNEL") bytes as 9a733.img"
+echo "  dtb: $(stat -c%s "$DTB") bytes as sun60i-a733-orangepi-4-pro.dtb"
 echo ""
 echo "SD card image: $IMG ($(stat -c%s "$IMG" | numfmt --to=iec))"
 echo ""
