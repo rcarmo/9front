@@ -1,13 +1,16 @@
 #!/usr/bin/expect -f
 set timeout 300
 log_user 1
+set script_dir [file dirname [file normalize [info script]]]
+set board [expr {[info exists env(BOARD)] ? $env(BOARD) : "orangepi4pro"}]
+set images "$script_dir/images/$board"
 spawn qemu-system-aarch64 \
     -M virt,gic-version=3,highmem-ecam=off \
     -cpu cortex-a72 -m 2G -smp 2 \
-    -bios /workspace/projects/9front/images/u-boot.bin \
-    -drive file=/workspace/projects/9front/images/9front-11677.arm64.qcow2,if=none,id=disk0,snapshot=on \
+    -bios $images/u-boot.bin \
+    -drive file=$images/9front-11677.arm64.qcow2,if=none,id=disk0,snapshot=on \
     -device virtio-blk-pci-non-transitional,drive=disk0 \
-    -drive file=/workspace/projects/9front/images/portdisk.img,if=none,id=portdisk,format=raw \
+    -drive file=$images/portdisk.img,if=none,id=portdisk,format=raw \
     -device virtio-blk-pci-non-transitional,drive=portdisk \
     -nic user,model=virtio-net-pci-non-transitional \
     -nographic -serial mon:stdio \

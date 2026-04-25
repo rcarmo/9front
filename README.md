@@ -12,7 +12,7 @@ make sdcard        # build bootable SD card image
 
 Flash to SD card:
 ```sh
-sudo dd if=images/sdcard.img of=/dev/sdX bs=1M status=progress
+sudo dd if=images/orangepi4pro/sdcard.img of=/dev/sdX bs=1M status=progress
 ```
 
 ## Build Targets
@@ -92,7 +92,7 @@ Shared arm64 code reused from `sys/src/9/arm64/`:
 - ARM cross-compiler (`gcc-arm-linux-gnueabi`, for vendor U-Boot only)
 
 Pinned hardware bootstrap blobs are kept under `bootstrap/orangepi4pro/`.
-Generated outputs stay in `images/`.
+Generated outputs stay in `images/<board>/`.
 
 ## Peripheral Status
 
@@ -110,13 +110,14 @@ Generated outputs stay in `images/`.
 
 ## Repository Layout Convention
 
-- `bootstrap/` — checked-in board bootstrap binaries needed for hardware bring-up
-- `images/` — generated images and local build outputs
+- `vendors/<name>/` — checked-out upstream source trees and submodules
+- `bootstrap/<board>/` — checked-in board bootstrap binaries needed for hardware bring-up
+- `images/<board>/` — board-specific generated images and emulator/runtime assets
 - `port/a733/` — kernel port sources
 
 ## Vendor Resources
 
-- **BSP:** [orangepi-xunlong/orangepi-build](https://github.com/orangepi-xunlong/orangepi-build)
+- **BSP:** [orangepi-xunlong/orangepi-build](https://github.com/orangepi-xunlong/orangepi-build) → local checkout at `vendors/orangepi-build/`
 - **U-Boot fork:** `v2018.05-sun60iw2` branch on gitee
 - **Board config:** `orangepi4pro.conf` → `sun60iw2` family
 - **DTB:** `allwinner/sun60i-a733-orangepi-4-pro.dtb`

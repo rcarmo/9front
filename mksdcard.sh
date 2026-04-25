@@ -12,17 +12,19 @@
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENDOR_BOOT_DIR="$SCRIPT_DIR/bootstrap/orangepi4pro/vendor-debian-1.0.6"
+BOARD="${BOARD:-orangepi4pro}"
+VENDOR_BOOT_DIR="$SCRIPT_DIR/bootstrap/$BOARD/vendor-debian-1.0.6"
 BOOT0="${BOOT0:-$VENDOR_BOOT_DIR/raw/boot0_sdcard.fex}"
 BOOTPKG="${BOOTPKG:-$VENDOR_BOOT_DIR/raw/boot_package.fex}"
 DTB="${DTB:-$VENDOR_BOOT_DIR/dtb/sun60i-a733-orangepi-4-pro.dtb}"
-IMG="$SCRIPT_DIR/images/sdcard.img"
-KERNEL="${1:-$SCRIPT_DIR/images/9a733.u}"
-RAWKERNEL="$SCRIPT_DIR/images/9a733.k"
-BOOTIKERNEL="$SCRIPT_DIR/images/9a733.img"
+IMGDIR="$SCRIPT_DIR/images/$BOARD"
+IMG="$IMGDIR/sdcard.img"
+KERNEL="${1:-$IMGDIR/9a733.u}"
+RAWKERNEL="$IMGDIR/9a733.k"
+BOOTIKERNEL="$IMGDIR/9a733.img"
 
-[ -f "$BOOT0" ] || BOOT0="$SCRIPT_DIR/orangepi-build/external/packages/pack-uboot/sun60iw2/bin/boot0_sdcard_a733.fex"
-[ -f "$BOOTPKG" ] || BOOTPKG="$SCRIPT_DIR/images/boot_package.fex"
+[ -f "$BOOT0" ] || BOOT0="$SCRIPT_DIR/vendors/orangepi-build/external/packages/pack-uboot/sun60iw2/bin/boot0_sdcard_a733.fex"
+[ -f "$BOOTPKG" ] || BOOTPKG="$SCRIPT_DIR/images/$BOARD/boot_package.fex"
 
 if [ ! -f "$BOOT0" ]; then
     echo "Missing boot0: $BOOT0"
@@ -48,6 +50,7 @@ echo "  boot0 source: $BOOT0"
 echo "  boot_package source: $BOOTPKG"
 echo "  dtb source: $DTB"
 
+mkdir -p "$IMGDIR"
 tail -c +65 "$KERNEL" > "$RAWKERNEL"
 python3 - "$RAWKERNEL" "$BOOTIKERNEL" <<'PY'
 import struct, sys

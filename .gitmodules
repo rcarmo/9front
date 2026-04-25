@@ -1,0 +1,4 @@
+[submodule "vendors/orangepi-build"]
+	path = vendors/orangepi-build
+	url = https://github.com/orangepi-xunlong/orangepi-build.git
+	branch = next
