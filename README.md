@@ -91,7 +91,8 @@ Shared arm64 code reused from `sys/src/9/arm64/`:
 - qemu-user-static (for building vendor U-Boot boot blobs)
 - ARM cross-compiler (`gcc-arm-linux-gnueabi`, for vendor U-Boot only)
 
-Pre-built boot blobs are included in `images/`.
+Pinned hardware bootstrap blobs are kept under `bootstrap/orangepi4pro/`.
+Generated outputs stay in `images/`.
 
 ## Peripheral Status
 
@@ -106,6 +107,12 @@ Pre-built boot blobs are included in `images/`.
 | USB XHCI | `port/usbxhci.c` | ⏳ Needs testing |
 | Ethernet | — | 🆕 Not started (Synopsys GMAC) |
 | SD/eMMC | — | 🆕 Not started (Allwinner MMC) |
+
+## Repository Layout Convention
+
+- `bootstrap/` — checked-in board bootstrap binaries needed for hardware bring-up
+- `images/` — generated images and local build outputs
+- `port/a733/` — kernel port sources
 
 ## Vendor Resources
 
