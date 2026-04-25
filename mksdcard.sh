@@ -12,10 +12,10 @@
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENDOR_BOOT_DIR="$SCRIPT_DIR/images/orangepi-debian-1.0.6"
-BOOT0="${BOOT0:-$VENDOR_BOOT_DIR/extracted/boot0_sdcard_exact.fex}"
-BOOTPKG="${BOOTPKG:-$VENDOR_BOOT_DIR/extracted/boot_package_exact.fex}"
-DTB="${DTB:-$VENDOR_BOOT_DIR/boot/dtb/allwinner/sun60i-a733-orangepi-4-pro.dtb}"
+VENDOR_BOOT_DIR="$SCRIPT_DIR/bootstrap/orangepi4pro/vendor-debian-1.0.6"
+BOOT0="${BOOT0:-$VENDOR_BOOT_DIR/raw/boot0_sdcard.fex}"
+BOOTPKG="${BOOTPKG:-$VENDOR_BOOT_DIR/raw/boot_package.fex}"
+DTB="${DTB:-$VENDOR_BOOT_DIR/dtb/sun60i-a733-orangepi-4-pro.dtb}"
 IMG="$SCRIPT_DIR/images/sdcard.img"
 KERNEL="${1:-$SCRIPT_DIR/images/9a733.u}"
 RAWKERNEL="$SCRIPT_DIR/images/9a733.k"
