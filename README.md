@@ -1,6 +1,6 @@
 # 9front ARM64 — Orange Pi 4 Pro
 
-![Icon](docs/icon.png)
+![Icon](docs/icon-256.png)
 
 Porting [9front](http://9front.org) to the [Orange Pi 4 Pro](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-4-Pro.html) (Allwinner A733).
 
