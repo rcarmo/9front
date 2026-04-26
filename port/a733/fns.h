@@ -170,3 +170,4 @@ extern void pciintrdisable(int tbdf, void (*f)(Ureg*, void*), void *a);
 
 /* bootargs */
 extern void bootargsinit(void);
+extern void setbootdtb(uintptr);

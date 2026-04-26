@@ -92,8 +92,8 @@ install:V: /$objtype/$p$CONF
 <|../port/mkbootrules $CONF
 
 # Shared arm64 assembly
-l.$O:	../arm64/l.s
-	$AS -I. ../arm64/l.s
+l.$O:	l.s
+	$AS -I. l.s
 
 cache.v8.$O:	../arm64/cache.v8.s
 	$AS -I. ../arm64/cache.v8.s
@@ -111,17 +111,17 @@ clock.$O:	../arm64/clock.c
 fpu.$O:	../arm64/fpu.c
 	$CC $CFLAGS -I. ../arm64/fpu.c
 
-gic.$O:	../arm64/gic.c
-	$CC $CFLAGS -I. ../arm64/gic.c
+gic.$O:	gic.c
+	$CC $CFLAGS -I. gic.c
 
 mmu.$O:	../arm64/mmu.c
 	$CC $CFLAGS -I. ../arm64/mmu.c
 
-mem.$O:	../arm64/mem.c
-	$CC $CFLAGS -I. ../arm64/mem.c
+mem.$O:	mem.c
+	$CC $CFLAGS -I. mem.c
 
-main.$O:	../arm64/main.c
-	$CC $CFLAGS -I. ../arm64/main.c
+main.$O:	main.c
+	$CC $CFLAGS -I. main.c
 
 sysreg.$O:	../arm64/sysreg.c
 	$CC $CFLAGS -I. ../arm64/sysreg.c
@@ -129,8 +129,8 @@ sysreg.$O:	../arm64/sysreg.c
 trap.$O:	../arm64/trap.c
 	$CC $CFLAGS -I. ../arm64/trap.c
 
-bootargs.$O:	../arm64/bootargs.c
-	$CC $CFLAGS -I. ../arm64/bootargs.c
+bootargs.$O:	bootargs.c
+	$CC $CFLAGS -I. bootargs.c
 
 main.$O: rebootcode.i
 

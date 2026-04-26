@@ -56,15 +56,18 @@ python3 - "$RAWKERNEL" "$BOOTIKERNEL" <<'PY'
 import struct, sys
 src, dst = sys.argv[1], sys.argv[2]
 payload = open(src, 'rb').read()
-# Minimal AArch64 Linux Image header so U-Boot booti will enter AArch64 and branch
-# to the real 9front kernel placed immediately after the 64-byte header.
+# Minimal AArch64 Linux Image header so vendor U-Boot booti will relocate the
+# wrapper to base-of-RAM + text_offset, then branch into the real 9front kernel.
+# We want the payload to start at 0x40100000, so place the 64-byte wrapper at
+# 0x400fffc0 and the payload immediately after it.
 # code0 = NOP, code1 = B +0x3c (from offset 4 -> 0x40)
+text_offset = 0x100000 - 64
 header = bytearray()
 header += struct.pack('<I', 0xD503201F)
 header += struct.pack('<I', 0x1400000F)
-header += struct.pack('<Q', 0)
+header += struct.pack('<Q', text_offset)
 header += struct.pack('<Q', len(payload) + 64)
-header += struct.pack('<Q', 0xA)
+header += struct.pack('<Q', 0x2)
 header += struct.pack('<Q', 0)
 header += struct.pack('<Q', 0)
 header += struct.pack('<Q', 0)
@@ -107,9 +110,9 @@ mcopy -i "$IMG.fat" "$DTB" ::/sun60i-a733-orangepi-4-pro.dtb
 # Create U-Boot boot script
 cat > /tmp/boot.cmd << 'BOOTCMD'
 echo "=== 9front Orange Pi 4 Pro ==="
-fatload ${devtype} ${devnum}:1 0x40000000 sun60i-a733-orangepi-4-pro.dtb
-fatload ${devtype} ${devnum}:1 0x400fffc0 9a733.img
-booti 0x400fffc0 - 0x40000000
+fatload ${devtype} ${devnum}:1 ${fdt_addr_r} sun60i-a733-orangepi-4-pro.dtb
+fatload ${devtype} ${devnum}:1 ${kernel_addr_r} 9a733.img
+booti ${kernel_addr_r} - ${fdt_addr_r}
 BOOTCMD
 mkimage -C none -A arm64 -T script -d /tmp/boot.cmd /tmp/boot.scr 2>/dev/null || true
 if [ -f /tmp/boot.scr ]; then
