@@ -44,10 +44,11 @@
 #define VDRAM		(0xFFFFFFFFC0000000ULL)	/* 0x40000000 - 0x80000000 */
 #define	KTZERO		(VDRAM + 0x100000)	/* 0x40100000 - kernel text start */
 
-#define PHYSIO		0x8000000
-#define PHYSIOEND	0x10000000
+#define PHYSIO		0x02000000
+#define PHYSIOEND	0x08000000
 
 #define	VIRTIO		(0xFFFFFFFFB0000000ULL)
+#define	IOADDR(pa)	(VIRTIO + ((pa) - PHYSIO))
 
 #define	KZERO		(0xFFFFFFFF80000000ULL)	/* 0x00000000 - kernel address space */
 

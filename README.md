@@ -26,6 +26,9 @@ sudo dd if=images/orangepi4pro/sdcard.img of=/dev/sdX bs=1M status=progress
 | `make sdcard` | Build bootable SD card image (64MB) |
 | `make boot` | Boot 9front QEMU (snapshot mode) |
 | `make dev` | Boot QEMU with port disk attached (interactive) |
+| `make serial-start` | Start tmux + `picocom` serial capture |
+| `make serial-status` | Show serial capture status |
+| `make serial-attach` | Attach to the serial tmux session |
 | `make clean` | Remove build artifacts |
 
 ## SD Card Image Layout
@@ -54,21 +57,25 @@ sudo dd if=images/orangepi4pro/sdcard.img of=/dev/sdX bs=1M status=progress
 port/a733/
 ├── NOTES.md    # Hardware addresses, design decisions
 ├── a733        # Kernel config
+├── bootargs.c  # Local DTB/bootargs handling override
 ├── dat.h       # Data structures (from arm64/)
-├── fns.h       # Function declarations (from arm64/)
+├── fns.h       # Function declarations
+├── gic.c       # Local GICv3 mapping/bring-up override
 ├── io.h        # I/O and interrupt definitions
+├── l.s         # Early boot assembly + UART breadcrumbs
 ├── lcd.c       # Display init (WIP — inherits U-Boot framebuffer)
-├── mem.h       # Memory map (arm64/ + A733 peripheral addresses)
-├── mkfile      # Build rules (references ../arm64/ for shared code)
+├── main.c      # Local early init override
+├── mem.c       # Local temporary MMU/map setup override
+├── mem.h       # Memory map + A733 peripheral addresses
+├── mkfile      # Build rules
 ├── pciaw.c     # PCIe host controller stub
 ├── screen.c    # Framebuffer console (WIP)
 ├── screen.h    # Screen declarations
 └── uartaw.c    # Allwinner UART driver (8250-compat, MMIO)
 ```
 
-Shared arm64 code reused from `sys/src/9/arm64/`:
-`l.s`, `cache.v8.s`, `clock.c`, `fpu.c`, `gic.c`, `main.c`,
-`mem.c`, `mmu.c`, `sysreg.c`, `trap.c`, `bootargs.c`
+Shared arm64 code still reused from `sys/src/9/arm64/` where not locally overridden:
+`cache.v8.s`, `clock.c`, `fpu.c`, `mmu.c`, `sysreg.c`, `trap.c`
 
 ## Development Workflow
 
@@ -109,6 +116,27 @@ Generated outputs stay in `images/<board>/`.
 | USB XHCI | `port/usbxhci.c` | ⏳ Needs testing |
 | Ethernet | — | 🆕 Not started (Synopsys GMAC) |
 | SD/eMMC | — | 🆕 Not started (Allwinner MMC) |
+
+## Current Bring-up Status
+
+- Raw boot chain is working: Boot0 → ATF → U-Boot → `boot.scr`
+- U-Boot accepts the wrapper image and DTB and reaches `Starting kernel ...`
+- Current early boot breadcrumbs stop at `ABCDE01234`
+- That means execution reaches `mmuenable()` and dies immediately before the first post-`SCTLR_EL1` breadcrumb
+- Current work is focused on MMU/page-table bring-up, not boot media, DTB loading, or serial capture
+
+Detailed notes are in `docs/BRINGUP-STATUS.md`.
+
+## Serial Monitoring
+
+Default serial capture settings:
+
+- device: `/dev/ttyUSB0`
+- baud: `115200`
+- tmux session: `serial`
+- log: `/workspace/tmp/serial-boot.log`
+
+Use `make serial-start`, `make serial-status`, `make serial-tail`, and `make serial-attach`.
 
 ## Repository Layout Convention
 

@@ -50,7 +50,7 @@ enum {
 extern PhysUart awphysuart;
 
 static Uart awuart = {
-	.regs	= (void*)(VIRTIO + UART0),
+	.regs	= (void*)IOADDR(UART0),
 	.name	= "uart0",
 	.freq	= 0,
 	.phys	= &awphysuart,
