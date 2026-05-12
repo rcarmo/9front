@@ -1,0 +1,39 @@
+
+/workspace/tmp/orangepi-image/boot/vmlinux-5.15.147-sun60iw2:     file format binary
+
+
+Disassembly of section .data:
+
+ffffffc008e2a31c <.data+0xe2a31c>:
+ffffffc008e2a31c:	d5380702 	mrs	x2, id_aa64mmfr0_el1
+ffffffc008e2a320:	d35c7c42 	ubfx	x2, x2, #28, #4
+ffffffc008e2a324:	f100005f 	cmp	x2, #0x0
+ffffffc008e2a328:	540002cb 	b.lt	0xffffffc008e2a380  // b.tstop
+ffffffc008e2a32c:	f1001c5f 	cmp	x2, #0x7
+ffffffc008e2a330:	5400028c 	b.gt	0xffffffc008e2a380
+ffffffc008e2a334:	d2800003 	mov	x3, #0x0                   	// #0
+ffffffc008e2a338:	d0004dc2 	adrp	x2, 0xffffffc0097e4000
+ffffffc008e2a33c:	91002042 	add	x2, x2, #0x8
+ffffffc008e2a340:	f9000043 	str	x3, [x2]
+ffffffc008e2a344:	d5033fbf 	dmb	sy
+ffffffc008e2a348:	d5087622 	dc	ivac, x2
+ffffffc008e2a34c:	b0002962 	adrp	x2, 0xffffffc009357000
+ffffffc008e2a350:	aa0103e1 	mov	x1, x1
+ffffffc008e2a354:	aa0203e2 	mov	x2, x2
+ffffffc008e2a358:	d5182002 	msr	ttbr0_el1, x2
+ffffffc008e2a35c:	d5182021 	msr	ttbr1_el1, x1
+ffffffc008e2a360:	d5033fdf 	isb
+ffffffc008e2a364:	d5181000 	msr	sctlr_el1, x0
+ffffffc008e2a368:	d5033fdf 	isb
+ffffffc008e2a36c:	d508751f 	ic	iallu
+ffffffc008e2a370:	d503379f 	dsb	nsh
+ffffffc008e2a374:	d5033fdf 	isb
+ffffffc008e2a378:	d65f03c0 	ret
+ffffffc008e2a37c:	d65f03c0 	ret
+ffffffc008e2a380:	d2804042 	mov	x2, #0x202                 	// #514
+ffffffc008e2a384:	d0004dc1 	adrp	x1, 0xffffffc0097e4000
+ffffffc008e2a388:	91002021 	add	x1, x1, #0x8
+ffffffc008e2a38c:	f9000022 	str	x2, [x1]
+ffffffc008e2a390:	d5033fbf 	dmb	sy
+ffffffc008e2a394:	d5087621 	dc	ivac, x1
+ffffffc008e2a398:	d503205f 	wfe

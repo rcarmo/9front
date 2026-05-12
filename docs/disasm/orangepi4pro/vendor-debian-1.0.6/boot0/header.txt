@@ -1,0 +1,12 @@
+file=boot0_sdcard.fex
+size 245760 0x3c000
+magic b'eGON.BT0'
+branch 0xea0002be
+checksum 0x7d956e08
+length 0x3c000
+pub_head_size 0x30
+run_addr 0x47000
+boot_cpu 0x47000
+platform 0x101
+dram_clk 0x708
+dram_type 0x9

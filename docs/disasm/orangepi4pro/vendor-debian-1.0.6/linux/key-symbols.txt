@@ -1,0 +1,8 @@
+ffffffc008000000 T _text
+ffffffc008010000 T _stext
+ffffffc008e2a31c T __enable_mmu
+ffffffc008e2a3ec t __primary_switch
+ffffffc008e2a6d8 T __cpu_setup
+ffffffc009360000 T primary_entry
+ffffffc009360040 t __create_page_tables
+ffffffc0093602ac t __primary_switched

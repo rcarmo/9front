@@ -33,13 +33,24 @@ Override any of these with Make variables, e.g.:
 make serial-start SERIAL_DEV=/dev/ttyUSB1
 ```
 
+## Bring-up notes and audit trail
+
+Keep the running analysis in these files instead of scattering findings in chat only:
+
+- `docs/BRINGUP-STATUS.md` — current hardware breakpoint and short status
+- `docs/FIT-GAP-AUDIT.md` — deeper fit-gap analysis against the working vendor image
+- `docs/disasm/orangepi4pro/vendor-debian-1.0.6/` — targeted disassembly and source snapshots from the known-good boot chain
+
+When debugging early boot, update those notes in the same tranche as the code changes.
+
 ## Board rebuild workflow
 
 When changing boot-critical bring-up code for Orange Pi 4 Pro:
 
 1. edit files under `port/a733/`
-2. run `make kernel`
-3. run `make sdcard`
-4. run `make serial-fresh`
-5. flash `images/orangepi4pro/sdcard.img`
-6. watch UART before asking for video/framebuffer checks
+2. update `docs/BRINGUP-STATUS.md` / `docs/FIT-GAP-AUDIT.md` when findings change
+3. run `make kernel`
+4. run `make sdcard`
+5. run `make serial-fresh`
+6. flash `images/orangepi4pro/sdcard.img`
+7. watch UART before asking for video/framebuffer checks

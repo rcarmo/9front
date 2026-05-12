@@ -4,6 +4,10 @@
 #include "dat.h"
 #include "fns.h"
 
+/*
+ * INITMAP is the amount of DRAM that must be reachable through the initial
+ * high-half mappings before the regular meminit()/kmapram path runs.
+ */
 #define INITMAP	(ROUND((uintptr)end + BY2PG, PGLSZ(1))-KZERO)
 
 /*
@@ -11,38 +15,67 @@
  * (L1BOT) for TTBR0. This page table is only used until
  * mmu1init() loads m->mmutop.
  *
- * Audit note: L1BOT only reserves one page. Using a child table off that
- * page collided with the shared L1 area and could corrupt the kernel page
- * tables before MMU-on. Keep this as simple top-level block mappings.
+ * Audit note: L1BOT itself is only one page, so a child table cannot live at
+ * L1BOT+BY2PG without colliding with the shared L1 region. We therefore use a
+ * dedicated low DRAM scratch page just above REBOOTADDR.
  *
- * For early bring-up we identity-map the first 2GB as normal memory.
- * With caches disabled, this is good enough for early UART breadcrumbs and
- * avoids needing a separate TTBR0 child table for low MMIO.
+ * Layout used here:
+ *   - entry 0 -> child table for low MMIO as device memory
+ *   - entry 1 -> 1GB block for low DRAM at 0x40000000
  */
 void
 mmuidmap(uintptr *l1bot)
 {
+	uintptr *l0;
 	uintptr pa, pe, attr;
 
+	/*
+	 * Entry 0 uses a child table for low SoC MMIO so UART/GIC accesses keep
+	 * device attributes during the fragile post-MMU transition.
+	 *
+	 * Do not alias this with the TTBR1 root page at L1TOP: Linux keeps separate
+	 * idmap and swapper structures, and sharing one physical page for both table
+	 * roles makes the audit harder. Use a dedicated scratch page instead.
+	 */
+	l0 = (uintptr*)IDMAPL0ADDR;
+	memset(l0, 0, BY2PG);
+	l1bot[PTLX(0, PTLEVELS-1)] = (uintptr)l0 | PTEVALID | PTETABLE;
+
+	attr = PTEWRITE | PTEAF | PTEKERNEL | PTEUXN | PTEPXN | PTESH(SHARE_OUTER) | PTEDEVICE;
+	for(pa = PHYSIO; pa < PHYSIOEND; pa += PGLSZ(1))
+		l0[PTLX(pa, 1)] = pa | PTEVALID | PTEBLOCK | attr;
+
+	/*
+	 * High-half identity blocks for DRAM. With EVASHIFT=39 this now matches the
+	 * saved Linux image's 4KB/3-level/39-bit-VA strategy much more closely than
+	 * the earlier 36-bit layout.
+	 */
 	attr = PTEWRITE | PTEAF | PTEKERNEL | PTEUXN | PTESH(SHARE_INNER);
 	pe = -KZERO;
-	for(pa = 0; pa < pe; pa += PGLSZ(PTLEVELS-1))
+	for(pa = VDRAM - KZERO; pa < pe; pa += PGLSZ(PTLEVELS-1))
 		l1bot[PTLX(pa, PTLEVELS-1)] = pa | PTEVALID | PTEBLOCK | attr;
 }
 
 /*
  * Create initial shared kernel page table (L1) for TTBR1.
- * This page table covers the INITMAP and VIRTIO/SoC MMIO window,
- * and later we fill the RAM mappings in meminit().
+ * This page table covers the direct-map DRAM window and VIRTIO/SoC MMIO.
  */
 void
 mmu0init(uintptr *l1)
 {
 	uintptr va, pa, pe, attr;
 
-	/* DRAM - INITMAP */
+	/*
+	 * Direct-map the full KADDR()-reachable low DRAM window up front, not just
+	 * INITMAP. pageinit() allocates and zeroes a large Page array through xalloc,
+	 * and xallocz() dereferences KADDR(pa) for the entire kernel hole. With only
+	 * INITMAP mapped, that memset walks straight off the mapped high-half window
+	 * and faults during pageinit(). Linux's early linear map is broad enough that
+	 * this class of allocation works before the generic page allocator is fully
+	 * online, so match that model here.
+	 */
 	attr = PTEWRITE | PTEAF | PTEKERNEL | PTEUXN | PTESH(SHARE_INNER);
-	pe = INITMAP;
+	pe = -KZERO;
 	for(pa = VDRAM - KZERO, va = VDRAM; pa < pe; pa += PGLSZ(1), va += PGLSZ(1))
 		l1[PTL1X(va, 1)] = pa | PTEVALID | PTEBLOCK | attr;
 

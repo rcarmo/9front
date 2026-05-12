@@ -14,6 +14,17 @@
 
 Conf conf;
 
+static void
+earlymark(int ch)
+{
+	volatile u32int *r;
+
+	r = (u32int*)IOADDR(UART0);
+	while((r[0x14/4] & (1<<5)) == 0)
+		;
+	r[0x00/4] = ch;
+}
+
 int
 isaconfig(char *, int, ISAConf *)
 {
@@ -23,9 +34,14 @@ isaconfig(char *, int, ISAConf *)
 void
 init0(void)
 {
-	char buf[2*KNAMELEN], **sp;
+	char buf[2*KNAMELEN], **sp, **ksp;
+	uintptr usp;
+	Page *p;
+	KMap *k;
 
+	earlymark('n');
 	chandevinit();
+	earlymark('o');
 
 	if(!waserror()){
 		snprint(buf, sizeof(buf), "%s %s", "ARM64", conffile);
@@ -38,15 +54,64 @@ init0(void)
 		setconfenv();
 		poperror();
 	}
-	kproc("alarm", alarmkproc, 0);
+	earlymark('A');
+	/*
+	 * Temporary bring-up simplification: skip the alarm kproc until first user
+	 * entry works reliably. The current trace shows init0() reaching 'o' and then
+	 * falling into heavy scheduler churn before 'p'; removing this extra kernel
+	 * process lets us distinguish an alarm/clock interaction from a plain init0
+	 * setup bug.
+	 */
+	/* kproc("alarm", alarmkproc, 0); */
+	earlymark('B');
 
-	sp = (char**)(USTKTOP-sizeof(Tos) - 8 - sizeof(sp[0])*4);
-	sp[3] = sp[2] = sp[1] = nil;
-	strcpy(sp[1] = (char*)&sp[4], "boot");
-	sp[0] = (void*)&sp[1];
+	/*
+	 * Temporary bring-up workaround: writing directly to the first user stack
+	 * page from EL1 is currently fault-looping before the first instruction in
+	 * user mode. Seed that top stack page explicitly through its kernel alias so
+	 * touser() can run even while the kernel-on-user-fault path is still under
+	 * investigation.
+	 */
+	usp = USTKTOP-sizeof(Tos) - 8 - sizeof(sp[0])*4;
+	sp = (char**)usp;
+	earlymark('C');
+	p = fillpage(newpage(USTKTOP-BY2PG, nil), 0);
+	segpage(up->seg[SSEG], p);
+	k = kmap(p);
+	ksp = (char**)((uintptr)VA(k) + (usp & (BY2PG-1)));
+	ksp[3] = ksp[2] = ksp[1] = nil;
+	earlymark('D');
+	strcpy(ksp[1] = (char*)&ksp[4], "boot");
+	earlymark('E');
+	ksp[0] = (void*)&sp[1];
+	kunmap(k);
+	earlymark('F');
+	/*
+	 * Bypass the currently-suspect user-fault return path for bring-up by
+	 * faulting in both the first initcode instruction page and the top stack/TOS
+	 * page before the first ERET to EL0. If pid1 then reaches syscalls, the
+	 * remaining bug is specifically in resuming from the first user fault.
+	 */
+	if(fault(0x10028, 0x10028, 1) < 0)
+		panic("init0: prefault text");
+	earlymark('G');
+	if(fault(usp, usp, 0) < 0)
+		panic("init0: prefault stack top");
+	earlymark('H');
+	/*
+	 * init9/startboot immediately builds a deeper stack frame below usp. Prefault
+	 * the lower part of that same first stack page too so we can distinguish a
+	 * genuine resume-path bug from a second early EL0 stack write fault.
+	 */
+	if(fault(usp-0x100, usp-0x100, 0) < 0)
+		panic("init0: prefault stack mid");
+	if(fault(usp-0x200, usp-0x200, 0) < 0)
+		panic("init0: prefault stack low");
+	earlymark('I');
 
 	splhi();
 	fpukexit(nil);
+	earlymark('p');
 	touser((uintptr)sp);
 }
 
@@ -144,14 +209,17 @@ mpinit(void)
 void
 cpuidprint(void)
 {
-	iprint("cpu%d: 1000MHz QEMU\n", m->machno);
+	iprint("cpu%d: Allwinner A733\n", m->machno);
 }
 
 void
 main(uintptr dtbpa)
 {
+	earlymark('H');
 	setbootdtb(dtbpa);
+	earlymark('I');
 	machinit();
+	earlymark('J');
 	if(m->machno){
 		trapinit();
 		fpuinit();
@@ -164,28 +232,69 @@ main(uintptr dtbpa)
 		m->ticks = MACHP(0)->ticks;
 		schedinit();
 	}
+	earlymark('K');
 	uartconsinit();
+	earlymark('L');
 	quotefmtinstall();
+	earlymark('M');
 	bootargsinit();
+	earlymark('N');
 	meminit();
+	earlymark('O');
 	confinit();
+	earlymark('P');
 	xinit();
+	earlymark('Q');
 	printinit();
+	earlymark('R');
 	print("\nPlan 9\n");
+	earlymark('S');
 	trapinit();
+	earlymark('T');
 	fpuinit();
-	intrinit();
-	clockinit();
-	cpuidprint();
-	timersinit();
-	pageinit();
+	/*
+	 * Follow the Linux early-init sequencing more closely: keep IRQ/time setup
+	 * out of the deep bootstrap window and only start it after page/proc/chan
+	 * bootstrap is done. Also re-mask async abort/debug after trapinit(), since
+	 * trapinit() itself restores the normal arm64 runtime DAIF state.
+	 */
+	splx(0xF<<6);
+	earlymark('Z');
+	pageinitwrap();
 	procinit0();
+	earlymark('r');
 	initseg();
+	earlymark('s');
 	links();
-	chandevreset();
-	userinit();
+	earlymark('1');
+	intrinit();
+	earlymark('2');
+	clockinit();
+	earlymark('3');
+	cpuidprint();
+	earlymark('4');
+	timersinit();
+	earlymark('t');
+	/*
+	 * Temporary A733 bring-up bypass: chandevreset() currently trips a null
+	 * function-pointer call inside device-reset plumbing before the first user
+	 * process is created. Skip it for now so we can keep pushing bootstrap
+	 * forward, then come back and isolate the offending device reset path.
+	 */
+	userinitwrap();
+	earlymark('v');
 	mpinit();
+	earlymark('w');
 	mmu1init();
+	earlymark('x');
+	/*
+	 * Keep IRQ/FIQ masked until the first kproc reaches linkproc(), which
+	 * drops to spllo() itself. Unmasking here can take a timer interrupt while
+	 * up == nil, and that bootstrap IRQ path currently panics before the first
+	 * scheduler handoff completes.
+	 */
+	splx(0x3<<6);
+	earlymark('y');
 	schedinit();
 }
 

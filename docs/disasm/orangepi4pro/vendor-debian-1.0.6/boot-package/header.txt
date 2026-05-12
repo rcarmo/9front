@@ -1,0 +1,7 @@
+file=boot_package.fex
+size 1327104 0x144000
+magic b'sunxi-package\x00\x00\x00'
+length 0x144000
+u-boot offset 0x800 len 0x114000
+monitor offset 0x114800 len 0x13311
+scp offset 0x127c00 len 0x19db8

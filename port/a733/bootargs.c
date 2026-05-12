@@ -13,6 +13,17 @@ static int cpus;
 static char ncpu[256];
 static uintptr bootdtb = DTBADDR;
 
+static void
+bootmark(int ch)
+{
+	volatile u32int *r;
+
+	r = (u32int*)IOADDR(UART0);
+	while((r[0x14/4] & (1<<5)) == 0)
+		;
+	r[0x00/4] = ch;
+}
+
 static int
 findconf(char *k)
 {
@@ -163,17 +174,22 @@ parsedevtree(uchar *base, uintptr len)
 	Devtree t[1];
 	u32int total;
 
+	bootmark('p');
 	if(len < 28 || beget4(base) != DtHeader)
 		return -1;
+	bootmark('q');
 	total = beget4(base+4);
 	if(total < 28 || total > len)
 		return -1;
+	bootmark('r');
 	t->base = base;
 	t->end = t->base + total;
 	t->stab = (char*)base + beget4(base+12);
 	if(t->stab >= (char*)t->end)
 		return -1;
+	bootmark('s');
 	devtreenode(t, base + beget4(base+8), t->path);
+	bootmark('t');
 	return  0;
 }
 
@@ -187,26 +203,27 @@ setbootdtb(uintptr pa)
 void
 bootargsinit(void)
 {
-	int i;
-	uintptr pa, len;
-	void *va;
-
+	bootmark('a');
 	plan9iniinit(BOOTARGS, 0);
+	bootmark('b');
 
-	for(i = 0; i < 2; i++){
-		pa = i == 0 ? bootdtb : DTBADDR;
-		len = cankaddr(pa);
-		if(len == 0)
-			continue;
-		va = KADDR(pa);
-		if(parsedevtree(va, len) == 0){
-			if(findconf("*ncpu") < 0){
-				snprint(ncpu, sizeof(ncpu), "%d", cpus);
-				addconf("*ncpu", ncpu);
-			}
-			return;
-		}
+	/*
+	 * Temporary A733 bring-up bypass: DTB parsing is still faulting very early
+	 * inside parsedevtree() even after the MMU-on path was repaired. Also keep
+	 * the fallback RAM size inside the current direct-map window for now: the
+	 * first proc0() text-page copy just proved that KMAP high-memory aliases are
+	 * not working yet on this port. Cap fallback RAM at physical 0x80000000 so
+	 * early userinit/proc0 bring-up stays below the broken KMAP boundary.
+	 */
+	if(findconf("*maxmem") < 0){
+		snprint(maxmem, sizeof(maxmem), "%#llux", 0x80000000ULL);
+		addconf("*maxmem", maxmem);
 	}
+	if(findconf("*ncpu") < 0){
+		snprint(ncpu, sizeof(ncpu), "%d", 1);
+		addconf("*ncpu", ncpu);
+	}
+	bootmark('o');
 }
 
 char*

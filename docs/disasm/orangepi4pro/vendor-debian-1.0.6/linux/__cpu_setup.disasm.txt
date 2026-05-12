@@ -1,0 +1,64 @@
+
+/workspace/tmp/orangepi-image/boot/vmlinux-5.15.147-sun60iw2:     file format binary
+
+
+Disassembly of section .data:
+
+ffffffc008e2a6d8 <.data+0xe2a6d8>:
+ffffffc008e2a6d8:	d508871f 	tlbi	vmalle1
+ffffffc008e2a6dc:	d503379f 	dsb	nsh
+ffffffc008e2a6e0:	d2a00601 	mov	x1, #0x300000              	// #3145728
+ffffffc008e2a6e4:	d5181041 	msr	cpacr_el1, x1
+ffffffc008e2a6e8:	d2820001 	mov	x1, #0x1000                	// #4096
+ffffffc008e2a6ec:	d5100241 	msr	mdscr_el1, x1
+ffffffc008e2a6f0:	d5033fdf 	isb
+ffffffc008e2a6f4:	d50348ff 	msr	daifclr, #0x8
+ffffffc008e2a6f8:	d5380501 	mrs	x1, id_aa64dfr0_el1
+ffffffc008e2a6fc:	93482c21 	sbfx	x1, x1, #8, #4
+ffffffc008e2a700:	f100043f 	cmp	x1, #0x1
+ffffffc008e2a704:	5400004b 	b.lt	0xffffffc008e2a70c  // b.tstop
+ffffffc008e2a708:	d51b9e1f 	msr	pmuserenr_el0, xzr
+ffffffc008e2a70c:	d5380401 	mrs	x1, id_aa64pfr0_el1
+ffffffc008e2a710:	d36cbc21 	ubfx	x1, x1, #44, #4
+ffffffc008e2a714:	b4000041 	cbz	x1, 0xffffffc008e2a71c
+ffffffc008e2a718:	d51bd27f 	msr	amuserenr_el0, xzr
+ffffffc008e2a71c:	d2c00091 	mov	x17, #0x400000000           	// #17179869184
+ffffffc008e2a720:	f2a00891 	movk	x17, #0x44, lsl #16
+ffffffc008e2a724:	f29ffff1 	movk	x17, #0xffff
+ffffffc008e2a728:	d2e00210 	mov	x16, #0x10000000000000      	// #4503599627370496
+ffffffc008e2a72c:	f2c00e10 	movk	x16, #0x70, lsl #32
+ffffffc008e2a730:	f2b6ab30 	movk	x16, #0xb559, lsl #16
+ffffffc008e2a734:	f286a330 	movk	x16, #0x3519
+ffffffc008e2a738:	d5380009 	mrs	x9, midr_el1
+ffffffc008e2a73c:	92a00205 	mov	x5, #0xffffffffffefffff    	// #-1048577
+ffffffc008e2a740:	f29fffe5 	movk	x5, #0xffff
+ffffffc008e2a744:	8a050129 	and	x9, x9, x5
+ffffffc008e2a748:	d2a8c1e5 	mov	x5, #0x460f0000            	// #1175388160
+ffffffc008e2a74c:	f2800205 	movk	x5, #0x10
+ffffffc008e2a750:	eb05013f 	cmp	x9, x5
+ffffffc008e2a754:	540000c1 	b.ne	0xffffffc008e2a76c  // b.any
+ffffffc008e2a758:	d2e00c05 	mov	x5, #0x60000000000000      	// #27021597764222976
+ffffffc008e2a75c:	f2c00005 	movk	x5, #0x0, lsl #32
+ffffffc008e2a760:	f2a00005 	movk	x5, #0x0, lsl #16
+ffffffc008e2a764:	f2800005 	movk	x5, #0x0
+ffffffc008e2a768:	8a250210 	bic	x16, x16, x5
+ffffffc008e2a76c:	d0003b49 	adrp	x9, 0xffffffc009594000
+ffffffc008e2a770:	f9469d29 	ldr	x9, [x9, #3384]
+ffffffc008e2a774:	b3401530 	bfxil	x16, x9, #0, #6
+ffffffc008e2a778:	d5380705 	mrs	x5, id_aa64mmfr0_el1
+ffffffc008e2a77c:	d34008a5 	ubfx	x5, x5, #0, #3
+ffffffc008e2a780:	d28000a6 	mov	x6, #0x5                   	// #5
+ffffffc008e2a784:	eb0600bf 	cmp	x5, x6
+ffffffc008e2a788:	9a8580c5 	csel	x5, x6, x5, hi	// hi = pmore
+ffffffc008e2a78c:	b36008b0 	bfi	x16, x5, #32, #3
+ffffffc008e2a790:	d5380729 	mrs	x9, id_aa64mmfr1_el1
+ffffffc008e2a794:	92400d29 	and	x9, x9, #0xf
+ffffffc008e2a798:	b4000049 	cbz	x9, 0xffffffc008e2a7a0
+ffffffc008e2a79c:	b2590210 	orr	x16, x16, #0x8000000000
+ffffffc008e2a7a0:	d518a211 	msr	mair_el1, x17
+ffffffc008e2a7a4:	d5182050 	msr	tcr_el1, x16
+ffffffc008e2a7a8:	d2e04000 	mov	x0, #0x200000000000000     	// #144115188075855872
+ffffffc008e2a7ac:	f2c00400 	movk	x0, #0x20, lsl #32
+ffffffc008e2a7b0:	f2a69e80 	movk	x0, #0x34f4, lsl #16
+ffffffc008e2a7b4:	f29b23a0 	movk	x0, #0xd91d
+ffffffc008e2a7b8:	d65f03c0 	ret

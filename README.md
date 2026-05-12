@@ -27,7 +27,10 @@ sudo dd if=images/orangepi4pro/sdcard.img of=/dev/sdX bs=1M status=progress
 | `make boot` | Boot 9front QEMU (snapshot mode) |
 | `make dev` | Boot QEMU with port disk attached (interactive) |
 | `make serial-start` | Start tmux + `picocom` serial capture |
+| `make serial-fresh` | Truncate the serial log, then start capture |
+| `make serial-stop` | Stop tmux + `picocom` serial capture |
 | `make serial-status` | Show serial capture status |
+| `make serial-tail` | Tail the current serial log |
 | `make serial-attach` | Attach to the serial tmux session |
 | `make clean` | Remove build artifacts |
 
@@ -58,24 +61,29 @@ port/a733/
 ├── NOTES.md    # Hardware addresses, design decisions
 ├── a733        # Kernel config
 ├── bootargs.c  # Local DTB/bootargs handling override
+├── clock.c     # Local ARM generic-timer override for bring-up sequencing
 ├── dat.h       # Data structures (from arm64/)
-├── fns.h       # Function declarations
+├── fns.h       # Function declarations and local wrapper prototypes
 ├── gic.c       # Local GICv3 mapping/bring-up override
 ├── io.h        # I/O and interrupt definitions
-├── l.s         # Early boot assembly + UART breadcrumbs
+├── l.s         # Early boot assembly + UART breadcrumbs/wrappers
 ├── lcd.c       # Display init (WIP — inherits U-Boot framebuffer)
-├── main.c      # Local early init override
+├── main.c      # Local early init override and bootstrap ordering
 ├── mem.c       # Local temporary MMU/map setup override
 ├── mem.h       # Memory map + A733 peripheral addresses
-├── mkfile      # Build rules
+├── mkfile      # Build rules for local overrides
+├── page.c      # Local page allocator instrumentation
 ├── pciaw.c     # PCIe host controller stub
+├── proc.c      # Local scheduler/process instrumentation
 ├── screen.c    # Framebuffer console (WIP)
 ├── screen.h    # Screen declarations
-└── uartaw.c    # Allwinner UART driver (8250-compat, MMIO)
+├── trap.c      # Local trap/syscall/fault instrumentation
+├── uartaw.c    # Allwinner UART driver (8250-compat, MMIO)
+└── userinit.c  # Local first-process instrumentation
 ```
 
 Shared arm64 code still reused from `sys/src/9/arm64/` where not locally overridden:
-`cache.v8.s`, `clock.c`, `fpu.c`, `mmu.c`, `sysreg.c`, `trap.c`
+`cache.v8.s`, `fpu.c`, `mmu.c`, `sysreg.c`
 
 ## Development Workflow
 
@@ -97,6 +105,7 @@ Shared arm64 code still reused from `sys/src/9/arm64/` where not locally overrid
 - mtools (`mcopy`, `mformat`, `mdir`)
 - expect (`expect`)
 - mkimage (`u-boot-tools`)
+- tmux + picocom (for `make serial-*` hardware logs)
 - qemu-user-static (for building vendor U-Boot boot blobs)
 - ARM cross-compiler (`gcc-arm-linux-gnueabi`, for vendor U-Boot only)
 
@@ -107,9 +116,11 @@ Generated outputs stay in `images/<board>/`.
 
 | Peripheral | Driver | Status |
 |------------|--------|--------|
-| GICv3 | `arm64/gic.c` | ✅ Reused |
-| ARM Timer | `arm64/clock.c` | ✅ Reused |
-| UART (serial) | `uartaw.c` | ✅ Written |
+| GICv3 | `gic.c` | ✅ Local mapping/bring-up override |
+| ARM Timer | `clock.c` | ✅ Local generic-timer override; IRQ timing still under bring-up |
+| UART (serial) | `uartaw.c` | ✅ Written and used for breadcrumbs |
+| Trap/syscall path | `trap.c` | 🔧 Instrumented for pid1 fault/syscall debugging |
+| Scheduler/process path | `proc.c` + `userinit.c` | 🔧 Instrumented through first runnable process |
 | PCIe | `pciaw.c` | 🔧 Stub (DesignWare init needed) |
 | Framebuffer | `screen.c` + `lcd.c` | 🔧 Written, not yet in config |
 | NVMe | `port/sdnvme.c` | ⏳ Needs PCIe |
@@ -120,10 +131,16 @@ Generated outputs stay in `images/<board>/`.
 ## Current Bring-up Status
 
 - Raw boot chain is working: Boot0 → ATF → U-Boot → `boot.scr`
-- U-Boot accepts the wrapper image and DTB and reaches `Starting kernel ...`
-- Current early boot breadcrumbs stop at `ABCDE01234`
-- That means execution reaches `mmuenable()` and dies immediately before the first post-`SCTLR_EL1` breadcrumb
-- Current work is focused on MMU/page-table bring-up, not boot media, DTB loading, or serial capture
+- U-Boot accepts the Linux `Image` wrapper and DTB and reaches `Starting kernel ...`
+- The kernel now gets past the MMU transition, high-virtual handoff, `main()`, `pageinit()`, scheduler handoff, `proc0()`, `init0()`, and the first `touser()` edge
+- Latest captured breadcrumbs/log end after resolving pid1's first user stack write fault:
+  ```text
+  ...STZ5567890rspciaw...1234tuiI...JUvwxy[]...}kl...mnoABCDEFGHIpq
+  pid1 fault[0] ... far 0x3ffffefe90 write
+  pid1 fault[0] resolved
+  pid1 ureg preexit pc 0x10034 ... psr 0x80
+  ```
+- Current work is focused on the first EL0 fault-return/syscall path for pid1, not boot media, DTB loading, serial capture, or the initial MMU enable
 
 Detailed notes are in `docs/BRINGUP-STATUS.md`.
 
@@ -136,7 +153,7 @@ Default serial capture settings:
 - tmux session: `serial`
 - log: `/workspace/tmp/serial-boot.log`
 
-Use `make serial-start`, `make serial-status`, `make serial-tail`, and `make serial-attach`.
+Use `make serial-fresh`, `make serial-start`, `make serial-status`, `make serial-tail`, `make serial-attach`, and `make serial-stop`.
 
 ## Repository Layout Convention
 

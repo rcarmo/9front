@@ -1,0 +1,103 @@
+
+/workspace/tmp/orangepi-image/boot/vmlinux-5.15.147-sun60iw2:     file format binary
+
+
+Disassembly of section .data:
+
+ffffffc009360000 <.data+0x1360000>:
+ffffffc009360000:	94000008 	bl	0xffffffc009360020
+ffffffc009360004:	97eb27ff 	bl	0xffffffc008e2a000
+ffffffc009360008:	90ff6517 	adrp	x23, 0xffffffc008000000
+ffffffc00936000c:	924052f7 	and	x23, x23, #0x1fffff
+ffffffc009360010:	97eb287a 	bl	0xffffffc008e2a1f8
+ffffffc009360014:	9400000b 	bl	0xffffffc009360040
+ffffffc009360018:	97eb29b0 	bl	0xffffffc008e2a6d8
+ffffffc00936001c:	17eb28f4 	b	0xffffffc008e2a3ec
+ffffffc009360020:	aa0003f5 	mov	x21, x0
+ffffffc009360024:	b0001120 	adrp	x0, 0xffffffc009585000
+ffffffc009360028:	91000000 	add	x0, x0, #0x0
+ffffffc00936002c:	a9000415 	stp	x21, x1, [x0]
+ffffffc009360030:	a9010c02 	stp	x2, x3, [x0, #16]
+ffffffc009360034:	d5033fbf 	dmb	sy
+ffffffc009360038:	91008001 	add	x1, x0, #0x20
+ffffffc00936003c:	17b34466 	b	0xffffffc0080311d4
+ffffffc009360040:	aa1e03fc 	mov	x28, x30
+ffffffc009360044:	b0002760 	adrp	x0, 0xffffffc00984d000
+ffffffc009360048:	f0002761 	adrp	x1, 0xffffffc00984f000
+ffffffc00936004c:	97b34462 	bl	0xffffffc0080311d4
+ffffffc009360050:	b0002760 	adrp	x0, 0xffffffc00984d000
+ffffffc009360054:	f0002761 	adrp	x1, 0xffffffc00984f000
+ffffffc009360058:	cb000021 	sub	x1, x1, x0
+ffffffc00936005c:	a8817c1f 	stp	xzr, xzr, [x0], #16
+ffffffc009360060:	a8817c1f 	stp	xzr, xzr, [x0], #16
+ffffffc009360064:	a8817c1f 	stp	xzr, xzr, [x0], #16
+ffffffc009360068:	a8817c1f 	stp	xzr, xzr, [x0], #16
+ffffffc00936006c:	f1010021 	subs	x1, x1, #0x40
+ffffffc009360070:	54ffff61 	b.ne	0xffffffc00936005c  // b.any
+ffffffc009360074:	d2e00807 	mov	x7, #0x40000000000000      	// #18014398509481984
+ffffffc009360078:	f2c00007 	movk	x7, #0x0, lsl #32
+ffffffc00936007c:	f2a00007 	movk	x7, #0x0, lsl #16
+ffffffc009360080:	f280e027 	movk	x7, #0x701
+ffffffc009360084:	f0ffffa0 	adrp	x0, 0xffffffc009357000
+ffffffc009360088:	d0ffd643 	adrp	x3, 0xffffffc008e2a000
+ffffffc00936008c:	d28004e5 	mov	x5, #0x27                  	// #39
+ffffffc009360090:	90002426 	adrp	x6, 0xffffffc0097e4000
+ffffffc009360094:	910040c6 	add	x6, x6, #0x10
+ffffffc009360098:	f90000c5 	str	x5, [x6]
+ffffffc00936009c:	d5033fbf 	dmb	sy
+ffffffc0093600a0:	d5087626 	dc	ivac, x6
+ffffffc0093600a4:	d0ffd645 	adrp	x5, 0xffffffc008e2a000
+ffffffc0093600a8:	dac010a5 	clz	x5, x5
+ffffffc0093600ac:	f10064bf 	cmp	x5, #0x19
+ffffffc0093600b0:	540001ea 	b.ge	0xffffffc0093600ec  // b.tcont
+ffffffc0093600b4:	900011a6 	adrp	x6, 0xffffffc009594000
+ffffffc0093600b8:	9134e0c6 	add	x6, x6, #0xd38
+ffffffc0093600bc:	f90000c5 	str	x5, [x6]
+ffffffc0093600c0:	d5033fbf 	dmb	sy
+ffffffc0093600c4:	d5087626 	dc	ivac, x6
+ffffffc0093600c8:	d2804004 	mov	x4, #0x200                 	// #512
+ffffffc0093600cc:	91400405 	add	x5, x0, #0x1, lsl #12
+ffffffc0093600d0:	aa0503e6 	mov	x6, x5
+ffffffc0093600d4:	b24004c6 	orr	x6, x6, #0x3
+ffffffc0093600d8:	d367fc65 	lsr	x5, x3, #39
+ffffffc0093600dc:	d1000484 	sub	x4, x4, #0x1
+ffffffc0093600e0:	8a0400a5 	and	x5, x5, x4
+ffffffc0093600e4:	f8257806 	str	x6, [x0, x5, lsl #3]
+ffffffc0093600e8:	91400400 	add	x0, x0, #0x1, lsl #12
+ffffffc0093600ec:	900011a4 	adrp	x4, 0xffffffc009594000
+ffffffc0093600f0:	f946a084 	ldr	x4, [x4, #3392]
+ffffffc0093600f4:	d0ffd646 	adrp	x6, 0xffffffc008e2a000
+ffffffc0093600f8:	911f60c6 	add	x6, x6, #0x7d8
+ffffffc0093600fc:	d10004c6 	sub	x6, x6, #0x1
+ffffffc009360100:	91400401 	add	x1, x0, #0x1, lsl #12
+ffffffc009360104:	aa0103ee 	mov	x14, x1
+ffffffc009360108:	d280000d 	mov	x13, #0x0                   	// #0
+ffffffc00936010c:	d35efccb 	lsr	x11, x6, #30
+ffffffc009360110:	aa0403ea 	mov	x10, x4
+ffffffc009360114:	d100054a 	sub	x10, x10, #0x1
+ffffffc009360118:	8a0a016b 	and	x11, x11, x10
+ffffffc00936011c:	aa0403ea 	mov	x10, x4
+ffffffc009360120:	9b0d7d4a 	mul	x10, x10, x13
+ffffffc009360124:	8b0a016b 	add	x11, x11, x10
+ffffffc009360128:	d35efc6a 	lsr	x10, x3, #30
+ffffffc00936012c:	aa0403ed 	mov	x13, x4
+ffffffc009360130:	d10005ad 	sub	x13, x13, #0x1
+ffffffc009360134:	8a0d014a 	and	x10, x10, x13
+ffffffc009360138:	cb0a016d 	sub	x13, x11, x10
+ffffffc00936013c:	aa0103ec 	mov	x12, x1
+ffffffc009360140:	b240058c 	orr	x12, x12, #0x3
+ffffffc009360144:	f82a780c 	str	x12, [x0, x10, lsl #3]
+ffffffc009360148:	91400421 	add	x1, x1, #0x1, lsl #12
+ffffffc00936014c:	9100054a 	add	x10, x10, #0x1
+ffffffc009360150:	eb0b015f 	cmp	x10, x11
+ffffffc009360154:	54ffff49 	b.ls	0xffffffc00936013c  // b.plast
+ffffffc009360158:	aa0e03e0 	mov	x0, x14
+ffffffc00936015c:	aa0103ee 	mov	x14, x1
+ffffffc009360160:	d355fccb 	lsr	x11, x6, #21
+ffffffc009360164:	d280400a 	mov	x10, #0x200                 	// #512
+ffffffc009360168:	d100054a 	sub	x10, x10, #0x1
+ffffffc00936016c:	8a0a016b 	and	x11, x11, x10
+ffffffc009360170:	d280400a 	mov	x10, #0x200                 	// #512
+ffffffc009360174:	9b0d7d4a 	mul	x10, x10, x13
+ffffffc009360178:	8b0a016b 	add	x11, x11, x10
+ffffffc00936017c:	d355fc6a 	lsr	x10, x3, #21

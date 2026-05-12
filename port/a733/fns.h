@@ -86,6 +86,7 @@ extern void clockinit(void);
 extern void synccycles(void);
 extern void armtimerset(int);
 extern void clockshutdown(void);
+extern void clockresume(void);
 
 /* fpu */
 extern void fpuinit(void);
@@ -109,6 +110,7 @@ extern void procrestore(Proc *);
 extern void trap(Ureg*);
 extern void syscall(Ureg*);
 extern void faultarm64(Ureg*);
+extern void trapresume(uintptr, uintptr, uintptr, uintptr, uintptr);
 extern void dumpstack(void);
 extern void dumpregs(Ureg*);
 
@@ -171,3 +173,5 @@ extern void pciintrdisable(int tbdf, void (*f)(Ureg*, void*), void *a);
 /* bootargs */
 extern void bootargsinit(void);
 extern void setbootdtb(uintptr);
+extern void pageinitwrap(void);
+extern void userinitwrap(void);

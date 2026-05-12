@@ -4,9 +4,19 @@
 #undef	SYSREG
 #define	SYSREG(op0,op1,Cn,Cm,op2)	SPR(((op0)<<19|(op1)<<16|(Cn)<<12|(Cm)<<8|(op2)<<5))
 
+/*
+ * Early bring-up notes:
+ *
+ * - We emit single-character breadcrumbs on UART0 as early as possible.
+ * - The current failing transition is at MMU enable, so the breadcrumbs are
+ *   arranged around that path to show exactly which register write we reached.
+ * - EARLYVECADDR lives in low DRAM so we can point VBAR_EL1 at an identity-
+ *   mapped address before the normal C trap setup runs.
+ */
 #define UART_LSR	0x14
 #define UART_THR	0x00
 #define UART_THRE	(1<<5)
+#define EARLYVECADDR	(REBOOTADDR + 0x800)
 
 TEXT _start(SB), 1, $-4
 	MOV	R0, R26		/* save */
@@ -63,18 +73,29 @@ _zerobss:
 	CMP	R1, R2
 	BNE	_zerobss
 
-	/* setup page tables */
+	/*
+	 * Build both temporary TTBR0 identity mappings and the shared TTBR1 kernel
+	 * mappings before we touch SCTLR_EL1.M.
+	 */
 	MOV	$(L1BOT-KZERO), R0
 	BL	mmuidmap(SB)
 
 	MOV	$(L1-KZERO), R0
 	BL	mmu0init(SB)
+
+	/*
+	 * Install a low-memory emergency vector table before MMU enable. If the
+	 * first post-MMU instruction takes an exception, we want a visible UART
+	 * breadcrumb instead of disappearing into stale firmware vectors.
+	 */
+	BL	setupvbar(SB)
 	MOVW	$'E', R0
 	BL	debugputcphys<>(SB)
 
 	SEVL
 _startup:
 	WFE
+	BL	cpusetup<>(SB)
 	BL	mmuenable<>(SB)
 	MOVW	$'F', R0
 	BL	debugputcvirt<>(SB)
@@ -88,6 +109,49 @@ _startup:
 	BL	debugputcvirt<>(SB)
 
 	BL	main(SB)
+
+/*
+ * Build a minimal EL1 vector table in low DRAM.
+ *
+ * Each 0x80-byte slot is filled with a single branch to earlyvechandler().
+ * We point VBAR_EL1 at the low physical address rather than a high virtual
+ * alias so that an exception taken during MMU bring-up still has a chance to
+ * fetch a valid vector through TTBR0.
+ */
+TEXT	setupvbar(SB), 1, $-4
+	MOV	$EARLYVECADDR, R1
+	MOVWU	$(0x800/8), R2
+setupvbarclr:
+	MOV	ZR, (R1)8!
+	SUBS	$1, R2
+	BNE	setupvbarclr
+
+	MOV	$earlyvechandler(SB), R3
+	MOV	$EARLYVECADDR, R4
+	MOV	$EARLYVECADDR, R7
+	ORR	$KZERO, R7
+	MOVWU	$16, R5
+setupvbarvec:
+	MOV	R3, R6
+	SUB	R7, R6
+	LSR	$2, R6
+	AND	$0x03ffffff, R6
+	ORR	$0x14000000, R6
+	MOVW	R6, (R4)
+	ADD	$0x80, R4
+	ADD	$0x80, R7
+	SUBS	$1, R5
+	BNE	setupvbarvec
+
+	MOV	$EARLYVECADDR, R0
+	MSR	R0, VBAR_EL1
+	ISB	$SY
+	RETURN
+
+TEXT	earlyvechandler(SB), 1, $-4
+	MOVW	$'X', R0
+	BL	debugputcphys<>(SB)
+	B	stop<>(SB)
 
 TEXT	debugputcphys<>(SB), 1, $-4
 	MOV	$UART0, R1
@@ -105,6 +169,60 @@ virtwait:
 	ANDS	$UART_THRE, R3
 	BEQ	virtwait
 	MOVW	R0, UART_THR(R2)
+	RETURN
+
+/*
+ * Emit markers immediately before and after pageinit(). Do the first marker
+ * inline with no stack push and no nested BL so we can distinguish a fault on
+ * the pageinit call/prologue edge from a fault deeper in pageinit().
+ */
+TEXT	pageinitwrap(SB), 1, $-4
+	MOV	$IOADDR(UART0), R2
+pageinitprewait:
+	MOVWU	UART_LSR(R2), R3
+	ANDS	$UART_THRE, R3
+	BEQ	pageinitprewait
+	MOVW	$'5', R0
+	MOVW	R0, UART_THR(R2)
+
+	MOV	LR, -16(RSP)!
+	BL	pageinit(SB)
+
+	/* pageinit() clobbers caller-saved registers, so reload UART base. */
+	MOV	$IOADDR(UART0), R2
+pageinitpostwait:
+	MOVWU	UART_LSR(R2), R3
+	ANDS	$UART_THRE, R3
+	BEQ	pageinitpostwait
+	MOVW	$'0', R0
+	MOVW	R0, UART_THR(R2)
+	MOV	(RSP)16!, LR
+	RETURN
+
+/*
+ * Emit markers immediately before and after userinit(). This distinguishes a
+ * failure on the call edge from one inside userinit/proc0 setup.
+ */
+TEXT	userinitwrap(SB), 1, $-4
+	MOV	$IOADDR(UART0), R2
+userinitprewait:
+	MOVWU	UART_LSR(R2), R3
+	ANDS	$UART_THRE, R3
+	BEQ	userinitprewait
+	MOVW	$'u', R0
+	MOVW	R0, UART_THR(R2)
+
+	MOV	LR, -16(RSP)!
+	BL	userinit(SB)
+
+	MOV	$IOADDR(UART0), R2
+userinitpostwait:
+	MOVWU	UART_LSR(R2), R3
+	ANDS	$UART_THRE, R3
+	BEQ	userinitpostwait
+	MOVW	$'U', R0
+	MOVW	R0, UART_THR(R2)
+	MOV	(RSP)16!, LR
 	RETURN
 
 TEXT	stop<>(SB), 1, $-4
@@ -206,16 +324,30 @@ TEXT mmudisable<>(SB), 1, $-4
 
 	B	flushlocaltlb(SB)
 
-TEXT mmuenable<>(SB), 1, $-4
-	/* return to virtual */
-	ORR	$KZERO, LR
+/*
+ * cpusetup<> follows the structure of the working Linux image more closely
+ * than the original generic 9front arm64 path:
+ *
+ *  - invalidate local EL1 TLB state first (matching Linux's early tlbi)
+ *  - program MAIR_EL1
+ *  - build TCR_EL1 using the Linux image's effective policy:
+ *      * 4KB pages
+ *      * 39-bit VA space
+ *      * 48-bit PA cap (IPS clamp to 5)
+ *      * A1/TBI/TBID bits matching the working image
+ *  - return a precomputed SCTLR_EL1 value rather than improvising one inside
+ *    the actual MMU-enable transition
+ *
+ * The MAIR layout remains 9front-specific because it must match the PTE attr
+ * indices used by this port's page table definitions.
+ */
+TEXT cpusetup<>(SB), 1, $-4
+	/* cpusetup<> calls debugputcphys<>, so preserve LR across nested BLs. */
 	MOV	LR, -16(RSP)!
 
-	BL	flushlocaltlb(SB)
-	MOVW	$'0', R0
-	BL	debugputcphys<>(SB)
+	TLBI	R0, 0,8,7,0	/* VMALLE1 */
+	DSB	$NSH
 
-	/* memory attributes */
 #define MAIRINIT \
 	( 0xFF << MA_MEM_WB*8 \
 	| 0x33 << MA_MEM_WT*8 \
@@ -226,21 +358,21 @@ TEXT mmuenable<>(SB), 1, $-4
 	| 0x0C << MA_DEV_GRE*8 )
 	MOV	$MAIRINIT, R1
 	MSR	R1, MAIR_EL1
-	ISB	$SY
 	MOVW	$'1', R0
 	BL	debugputcphys<>(SB)
 
-	/* translation control */
 #define TCRINIT \
-	/* TBI1 */	( 0<<38 \
-	/* TBI0 */	| 0<<37 \
-	/* AS */	| 0<<36 \
+	/* TBID1 */	( 1<<52 \
+	/* TBI1 */	| 1<<38 \
+	/* TBI0 */	| 1<<37 \
+	/* AS */	| 1<<36 \
+	/* RES1 */	| 1<<31 \
 	/* TG1 */	| (((3<<16|1<<14|2<<12)>>PGSHIFT)&3)<<30 \
 	/* SH1 */	| SHARE_INNER<<28 \
 	/* ORGN1 */	| CACHE_WB<<26 \
 	/* IRGN1 */	| CACHE_WB<<24 \
 	/* EPD1 */	| 0<<23 \
-	/* A1 */	| 0<<22 \
+	/* A1 */	| 1<<22 \
 	/* T1SZ */	| (64-EVASHIFT)<<16 \
 	/* TG0 */	| (((1<<16|2<<14|0<<12)>>PGSHIFT)&3)<<14 \
 	/* SH0 */	| SHARE_INNER<<12 \
@@ -250,45 +382,101 @@ TEXT mmuenable<>(SB), 1, $-4
 	/* T0SZ */	| (64-EVASHIFT)<<0 )
 	MOV	$TCRINIT, R1
 	MRS	ID_AA64MMFR0_EL1, R2
-	ANDW	$0x7, R2	// PARange
-	ADD	R2<<32, R1	// IPS
+	ANDW	$0x7, R2	// PARange field from hardware
+	MOVWU	$5, R3		// Linux clamps to 48-bit PA
+	CMPW	R2, R3
+	CSELW	HI, R3, R2, R2
+	ADD	R2<<32, R1	// IPS field in TCR_EL1
+	MRS	ID_AA64MMFR1_EL1, R4
+	ANDS	$0xF, R4
+	BEQ	cpusetupnods
+	/* Match Linux's conditional high TCR bit when MMFR1 says it is supported. */
+	ORR	$(1<<39), R1
+cpusetupnods:
 	MSR	R1, TCR_EL1
 	ISB	$SY
 	MOVW	$'2', R0
 	BL	debugputcphys<>(SB)
 
+	/*
+	 * Precomputed SCTLR_EL1 value observed from the working Linux image's
+	 * __cpu_setup path on this board family. The next step should make this
+	 * derived rather than copied once the port is stable.
+	 */
+	MOV	$0x0200002034f4d91d, R0
+	MOV	(RSP)16!, LR
+	RETURN
+
+/*
+ * mmuenable<> now mirrors the working Linux split more directly:
+ *
+ *   cpusetup<>     -> MAIR_EL1, TCR_EL1, return final SCTLR_EL1 in R0
+ *   mmuenable<>    -> TTBR0_EL1, TTBR1_EL1, ISB, SCTLR_EL1, ISB,
+ *                     IC IALLU, DSB NSH, ISB
+ *   primaryswitch<> -> switch to the high virtual stack/return path
+ *
+ * The breadcrumb order is:
+ *   0 - entered mmuenable
+ *   1 - MAIR written in cpusetup
+ *   2 - TCR written in cpusetup
+ *   3 - TTBRs written
+ *   4 - just before SCTLR_EL1 write
+ *   5 - first point reached after MMU enable + I-cache invalidate sequence
+ */
+TEXT mmuenable<>(SB), 1, $-4
+	/*
+	 * R0 arrives from cpusetup<> as the final SCTLR_EL1 value. Preserve it
+	 * across breadcrumb calls so the actual MMU-enable write uses the Linux-
+	 * derived control value rather than the last debug character.
+	 *
+	 * Also preserve the caller's LR before any nested BL. Otherwise the saved
+	 * return address points back into mmuenable<> itself and the post-MMU tail
+	 * loops through the 3/4/5 breadcrumbs forever.
+	 */
+	MOV	R0, R4
+	ORR	$KZERO, LR
+	MOV	LR, -16(RSP)!
+	MOVW	$'0', R0
+	BL	debugputcphys<>(SB)
+
 	/* load the page tables */
-	MOV	$(L1BOT-KZERO), R0
+	MOV	$(L1BOT-KZERO), R2
 	MOV	$(L1TOP-KZERO), R1
-	ISB	$SY
-	MSR	R0, TTBR0_EL1
+	MSR	R2, TTBR0_EL1
 	MSR	R1, TTBR1_EL1
 	ISB	$SY
 	MOVW	$'3', R0
 	BL	debugputcphys<>(SB)
 
-	/* enable MMU first; leave caches off for bring-up */
-	MRS	SCTLR_EL1, R1
-	ORR	$(1<<0), R1
+	/* enable MMU using the precomputed SCTLR_EL1 value from cpusetup<> */
 	MOVW	$'4', R0
 	BL	debugputcphys<>(SB)
+	MSR	R4, SCTLR_EL1
 	ISB	$SY
-	MSR	R1, SCTLR_EL1
+	IC	R0, 0,7,5,0	/* IALLU */
+	DSB	$NSH
 	ISB	$SY
 	MOVW	$'5', R0
 	BL	debugputcphys<>(SB)
 
+	B	primaryswitch<>(SB)
+
+TEXT primaryswitch<>(SB), 1, $-4
+	/* switch immediately to the high virtual stack+return path */
 	MOV	RSP, R1
 	ORR	$KZERO, R1
 	MOV	R1, RSP
-	MOVW	$'6', R0
-	BL	debugputcphys<>(SB)
 	MOV	(RSP)16!, LR
-	MOVW	$'7', R0
-	BL	debugputcphys<>(SB)
-	B	cacheiinv(SB)
+	RETURN
 
 TEXT touser(SB), 1, $-4
+	MOV	$IOADDR(UART0), R3
+ touserwait:
+	MOVWU	UART_LSR(R3), R4
+	ANDS	$UART_THRE, R4
+	BEQ	touserwait
+	MOVW	$'q', R4
+	MOVW	R4, UART_THR(R3)
 	MOVWU	$0x10028, R1	// entry
 	MOVWU	$0, R2		// psr
 	MSR	R0, SP_EL0	// sp
@@ -572,8 +760,6 @@ TEXT vtrap0(SB), 1, $-4
 TEXT noteret(SB), 1, $-4
 	MSR	$0x3, DAIFSet	// interrupts off
 
-	ADD	$16, RSP, R0	// ureg
-
 	MOV	264(RSP), R1	// sp
 	MOV	272(RSP), R2	// pc
 	MOV	280(RSP), R3	// psr
@@ -584,6 +770,7 @@ TEXT noteret(SB), 1, $-4
 
 	MOVP	224(RSP), R26, R27
 	MOVP	240(RSP), R28, R29
+	B	noteretreturn<>(SB)
 
 _intrreturn:
 	MOVP	16(RSP), R0, R1
@@ -602,6 +789,25 @@ _intrreturn:
 
 	MOV	256(RSP), R30	// link
 
+	ADD	$TRAPFRAMESIZE, RSP
+	ERET
+
+TEXT noteretreturn<>(SB), 1, $-4
+	MOVP	16(RSP), R0, R1
+	MOVP	32(RSP), R2, R3
+	MOVP	48(RSP), R4, R5
+	MOVP	64(RSP), R6, R7
+	MOVP	80(RSP), R8, R9
+	MOVP	96(RSP), R10, R11
+	MOVP	112(RSP), R12, R13
+	MOVP	128(RSP), R14, R15
+	MOVP	144(RSP), R16, R17
+	MOVP	160(RSP), R18, R19
+	MOVP	176(RSP), R20, R21
+	MOVP	192(RSP), R22, R23
+	MOVP	208(RSP), R24, R25
+
+	MOV	256(RSP), R30	// link
 	ADD	$TRAPFRAMESIZE, RSP
 	ERET
 

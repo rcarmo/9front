@@ -17,8 +17,15 @@
 #define	ROUND(s, sz)	(((s)+(sz-1))&~(sz-1))
 #define	PGROUND(s)	ROUND(s, BY2PG)
 
-/* effective virtual address space */
-#define EVASHIFT	36
+/*
+ * Effective virtual address space.
+ *
+ * The saved Debian image for this board family uses 4KB pages, 3 page-table
+ * levels, and 39-bit VA space. Keeping EVASHIFT at 39 makes our TCR/page-table
+ * geometry match that working reference more closely than the earlier 36-bit
+ * experiment did.
+ */
+#define EVASHIFT	39
 #define EVAMASK		((1ULL<<EVASHIFT)-1)
 
 #define PTSHIFT		(PGSHIFT-3)
@@ -33,9 +40,15 @@
 #define L1TOPSIZE	(1ULL << (EVASHIFT - PTLEVELS*PTSHIFT))
 
 #define	MAXMACH		16			/* max # cpus system can run */
-#define	MACHSIZE	(8*KiB)
+/*
+ * The generic arm64 8 KiB mach/kernel stacks are too tight during early
+ * bring-up on this board once timer interrupts start firing during the deeper
+ * init path. We have already seen `kenter` panic with the mach stack slightly
+ * overrun, so give both Mach and Proc kernel stacks more headroom.
+ */
+#define	MACHSIZE	(16*KiB)
 
-#define KSTACK		(8*KiB)
+#define KSTACK		(16*KiB)
 #define STACKALIGN(sp)	((sp) & ~7)		/* bug: assure with alloc */
 #define TRAPFRAMESIZE	(38*8)
 
@@ -77,6 +90,7 @@
 #define BOOTARGSLEN	0x10000
 
 #define	REBOOTADDR	(VDRAM-KZERO + 0x20000)	/* 0x40020000 */
+#define	IDMAPL0ADDR	(REBOOTADDR + BY2PG)	/* 0x40021000: TTBR0 L1 child scratch */
 
 #define	UZERO		0ULL			/* user segment */
 #define	UTZERO		(UZERO+0x10000)		/* user text start */

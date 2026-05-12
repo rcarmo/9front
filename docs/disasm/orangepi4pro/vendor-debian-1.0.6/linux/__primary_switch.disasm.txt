@@ -1,0 +1,20 @@
+
+/workspace/tmp/orangepi-image/boot/vmlinux-5.15.147-sun60iw2:     file format binary
+
+
+Disassembly of section .data:
+
+ffffffc008e2a3ec <.data+0xe2a3ec>:
+ffffffc008e2a3ec:	f0005101 	adrp	x1, 0xffffffc00984d000
+ffffffc008e2a3f0:	97ffffcb 	bl	0xffffffc008e2a31c
+ffffffc008e2a3f4:	97ffffec 	bl	0xffffffc008e2a3a4
+ffffffc008e2a3f8:	58000108 	ldr	x8, 0xffffffc008e2a418
+ffffffc008e2a3fc:	d0ff8ea0 	adrp	x0, 0xffffffc008000000
+ffffffc008e2a400:	d61f0100 	br	x8
+ffffffc008e2a404:	013dcb58 	.inst	0x013dcb58 ; undefined
+ffffffc008e2a408:	0019bca8 	.inst	0x0019bca8 ; undefined
+	...
+ffffffc008e2a420:	d51cd041 	msr	tpidr_el2, x1
+ffffffc008e2a424:	d503201f 	nop
+ffffffc008e2a428:	d508871f 	tlbi	vmalle1
+ffffffc008e2a42c:	d503379f 	dsb	nsh

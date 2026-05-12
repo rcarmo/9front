@@ -1,0 +1,718 @@
+sunxi-package
+MIE;u-boot
+IIE;monitor
+sunxi sprite error : imghead is null when close it
+sunxi sprite error : item is null when close it
+sunxi sprite error : item is NULL
+sunxi sprite error : hImage is NULL
+sunxi sprite error: unable to get firmware start position
+sunxi sprite error: fail to malloc memory for img head
+sunxi sprite error: read iamge head fail
+sunxi sprite error: iamge magic is bad
+sunxi sprite error: fail to malloc memory for item table
+sunxi sprite error: read iamge item table fail
+sunxi sprite error : cannot malloc memory for item
+sunxi sprite error : cannot find item %s %s
+sunxi sprite error : the item too big
+sunxi sprite error : buffer is smaller than data size
+sunxi sprite error : read item data failed
+sunxi_dsi_combophy_configure
+sunxi_dsi_combophy_probe
+sunxi_mmc_tuning_init
+sunxi_tuning_method_0
+sunxi_flash_mmc_phyerase
+sunxi_sprite_mmc_phyerase
+sunxi_tuning_speed_mode
+sunxi_flash_mmc_secread
+sunxi_tuning_speed_mode_tm5
+sunxi_flash_mmc_secread_backup
+sunxi_flash_mmc_secwrite
+sunxi_sprite_mmc_secread
+sunxi_sprite_mmc_secread_backup
+sunxi_tuning_hs400_cmd
+sunxi_sprite_mmc_secwrite
+sunxi_read_tuning
+sunxi_switch_to_best_bus
+sunxi_mmc_do_send_cmd_common
+sunxi_plane_atomic_update
+sunxi_plane_reset
+sunxi_drm_plane_init
+sunxi_wb_connector_check
+sunxi_drm_crtc_init_one
+sunxi_de_enable
+sunxi_de_disable
+sunxi_display_engine_init
+sunxi_de_bind
+sunxi_tcon_dsi_mode_init
+sunxi_tcon_lvds_mode_init
+sunxi_tcon_rgb_mode_init
+sunxi_tcon_of_get_id
+sunxi_drm_dsi_host_attach
+sunxi_lvds_connector_enable
+sunxi_lvds_connector_disable
+sunxi_dsi_connector_enable
+sunxi_de_add_kernel_iova_premap
+sunxi sprite error: open part %s failed
+sunxi sprite error: fetch part len %s failed
+sunxi sprite: data size 0x%x is larger than part %s size 0x%x
+sunxi sprite err : cant get part data imgfile_start %s
+sunxi sprite error : read sdcard block %d, total %d failed
+sunxi sprite error: download rawdata error %s
+sunxi sprite error: download rawdata error %s, start 0x%x, sectors 0x%x
+sunxi sprite error: download sparse error %s
+sunxi sprite error : read sdcard block 0x%x, total 0x%x failed
+sunxi sprite: part %s verify error
+sunxi sprite err: part %s unablt to find verify file
+sunxi sprite err: part %s not need to verify
+sunxi fastboot erase FAIL: partition %s does not exist
+sunxi fastboot erase FAIL: failed to erase partition %s
+sunxi fastboot: partition '%s' erased
+sunxi_tcon_top_probe
+sunxi_dsi_combophy_power_on
+sunxi_dsi_combophy_init
+sunxi_secure_storage_exit
+sunxi_secure_storage_list
+sunxi_secure_storage_read
+sunxi_probe_partition_map
+sunxi_secure_storage_write
+sunxi_secure_storage_erase_data_only
+sunxi_partition_get_partno_byname
+sunxi_mmc_set_clk_common
+sunxi_mmc_set_clk_type1
+sunxi_flash_mmc_download_spl
+sunxi_flash_mmc_download_boot_param
+sunxi_flash_mmc_download_toc
+sunxi_sprite_mmc_download_spl
+sunxi_sprite_mmc_download_boot_param
+sunxi_sprite_mmc_download_toc
+sunxi_secure_object_list
+sunxi_switch_to_best_bus
+sunxi_drm_find_crtc_by_port
+sunxi_crtc_disable
+sunxi_get_twi_bgr_reg
+sunxi_i2c_bus_setting
+sunxi_i2c_read
+sunxi_i2c_write
+sunxi_de_reg_buffer_alloc
+sunxi_usb_init
+sunxi_de_atomic_flush
+sunxi_de_get_disp_sys
+sunxi_de_write_back
+sunxi_eink_write_back
+sunxi_eink_wb_stop
+_sunxi_flash_spinor_write
+sunxi_sprite_spinor_download_boot_param
+sunxi_verify_rotpk_hash
+__sunxi_burn_key
+__sunxi_read_key_by_name
+sunxi_tcon_get_tcon_top
+sunxi_tcon_of_get_id
+sunxi_spi_cpu_writel
+sunxi_spi_cpu_readl
+sunxi_lvds_connector_enable
+sunxi_drm_lvds_probe
+sunxi_drm_dsi_probe
+sunxi_drm_dsi_post_bind
+__sunxi_usb_efex_op_cmd
+sunxi_drm_kernel_para_flush
+_sunxi_drm_hdmi_mode_set
+sunxi_pwm_pin_set_state
+sunxi_clk_register_factors
+sunxi_efuse_write failed with:%d
+sunxi deal with %s key resutl:%d
+sunxi_secure_storage_exit err
+sunxi-hdmi: [error] unable to map hdmi registers
+sunxi-hdmi: [error] hdmi drv detect dts not set irq.
+sunxi-hdmi: hdmi drv init dts done
+sunxi-hdmi: [warn] failed to request regulator(%s): %d
+sunxi-hdmi: hdmi drv power name: %s
+sunxi-hdmi: hdmi drv enable regulator %s %s
+not support dump uboot now, skip
+sunxi_mbr malloc failed in func %s:line %d
+sunxi_efex_next_action=%d
+sunxi-hdmi: channal %d is enable
+sunxi-hdmi: aw phy wait rcalend2d done
+sunxi-hdmi: aw phy wait pll lock done
+sunxi-hdmi: [error] pll_lock_status Timeout! status = 0x%x
+sunxi-hdmi: aw phy wait tx ready done
+sunxi-hdmi: [error] tx_ready_status Timeout ! status = 0x%x
+sunxi-hdmi: [error] phy_rcalend2d_status Timeout !
+sunxi-hdmi: [error] get n param frequency %dhz, pixel clk %dkhz, factor %d is unvalid!
+sunxi-hdmi: dw audio get n = %d
+sunxi-hdmi: [audio info]
+sunxi-hdmi:  - interface type = %s
+sunxi-hdmi:  - coding type = %s
+sunxi-hdmi:  - frequency = %dHz
+sunxi-hdmi:  - sample size = %d
+sunxi-hdmi:  - FS factor = %d
+sunxi-hdmi:  - ChannelAllocationr = %d
+sunxi-hdmi:  - mChannelNum = %d
+sunxi-hdmi: [error] invalid channel number: %d
+sunxi-hdmi: [error] dw i2cm wait state timeout
+sunxi-hdmi: [error] dw i2c write error, retry count: %d
+sunxi-hdmi: [avi packet]
+sunxi-hdmi:  - format: %s, scan: %s, cea code: %d
+sunxi-hdmi: dw video not send gmd packet
+sunxi-hdmi: [vsif packet]
+sunxi-hdmi:  - oui code: 0x%x
+sunxi-hdmi:  - data[%d]: 0x%x
+sunxi-hdmi: [error] PHY interface not defined
+sunxi-hdmi: inno phy config clkterres ndiv when phy version 0
+sunxi-hdmi: inno phy turn %s LDO when phy version %d
+sunxi-hdmi: [error] dw edid check colorimerty len[%d] invalid
+sunxi-hdmi: [error] dw edid parse dtd timing pixel clock[%dKHz] invalid!
+sunxi-hdmi: [error] invalid dtd byte[17] bit4 parameters
+sunxi-hdmi: [error] invalid dtd byte[17] bit3 parameters
+sunxi-hdmi: [error] dw edid check hdmi14 vsdb len[%d] invalid
+sunxi-hdmi: dw edid hdmi14 vsdb only parse physical address
+sunxi-hdmi: [error] Invalid length - latencies are not valid
+sunxi-hdmi: [error] Invalid length - Interlaced latencies are not valid
+sunxi-hdmi: [error] dw edid check hf-vsdb len[%d] invalid!
+sunxi-hdmi: [error] dw edid check hdr static metadata len[%d] invalid
+sunxi-hdmi:  - svd code[%03d], native[%d]
+sunxi-hdmi: [error] dw edid check speaker alloction len[%d] invalid!
+sunxi-hdmi: [error] dw edid check video capability len[%d] invalid
+sunxi-hdmi: uhdmi use fast output mode
+sunxi-hdmi: drm hdmi get hpd: %s
+sunxi-hdmi: [error] sunxi hdmi driver disable failed
+sunxi-hdmi: hdmi drv has been disable!
+sunxi-hdmi: hdmi drv disable done
+sunxi-hdmi: [error] sunxi tcon hdmi mode exit failed
+sunxi-hdmi: hdmi drv clock has been disable
+sunxi-hdmi: hdmi drv clock disable
+sunxi-hdmi: hdmi drv clock 24M disable
+sunxi-hdmi: hdmi drv all clock disable done
+sunxi-hdmi: drm hdmi atomic disable done.
+sunxi-hdmi: drm atomic enable fill config failed
+sunxi-hdmi: [error] sunxi tcon hdmi mode init failed
+sunxi-hdmi: [error] sunxi hdmi driver enable failed
+sunxi-hdmi: hdmi drv has been enable!
+sunxi-hdmi: [error] tcon clock rate is 0
+sunxi-hdmi: hdmi drv enable output done
+sunxi-hdmi: drm hdmi atomic enable done.
+sunxi-hdmi: [error] check point %s is err or null
+sunxi-hdmi: drm hdmi get mode num: %d
+sunxi-hdmi: drm hdmi use default mode
+sunxi-hdmi: drm hdmi init done
+sunxi-hdmi: [error] %s param hdmi is null!!!
+sunxi-hdmi: [error] drm mode set convert failed
+sunxi-hdmi: [error] drm mode disp_timing %d*%d convert disp disp_timing failed
+sunxi-hdmi: drm hdmi mode set: %d*%d done.
+sunxi-hdmi: drm hdmi check mode valid
+sunxi-hdmi: hdmi drv audio set %s %s
+sunxi-hdmi: hdmi drv audio set info %s
+sunxi-hdmi: hdmi drv clock has been enable
+sunxi-hdmi: hdmi drv main bus gating enable
+sunxi-hdmi: hdmi drv sub bus gating enable
+sunxi-hdmi: hdmi drv clock 24M enable
+sunxi-hdmi: hdmi drv clock enable
+sunxi-hdmi: hdmi drv all clock enable done
+sunxi-hdmi: [error] sunxi hdmi init dts failed!!!
+sunxi-hdmi: [error] sunxi hdmi init resource failed!!!
+sunxi-hdmi: hdmi drv init resource done
+sunxi-hdmi: [error] sunxi hdmi init config value failed
+sunxi-hdmi: [error] sunxi hdmi init core failed!!!
+sunxi-hdmi: hdmi drv init done
+gic: sec monitor mode
+sunxi-hdmi: [error] Unable to map input pixel clock frequency %d kHz
+sunxi-hdmi: EEROR: do not get phy_config
+sunxi-hdmi: [error] aw phy table unsupport clock %dhz, color depth %d, pixel repetition %d
+sunxi-hdmi: [error] [%s]: phy enable failed!
+sunxi-hdmi: phy pll locked!
+sunxi-hdmi: [error] PHY PLL not locked
+sunxi-hdmi: aw phy init
+sunxi-hdmi: [error] check read point value is null
+sunxi-hdmi: [error] check write point value is null
+sunxi_show_logo
+sunxi sprite: boot0 checksum is error flash_check_sum=0x%x
+sunxi sprite: toc0 magic is error
+sunxi sprite: toc0 checksum is error flash_check_sum=0x%x
+uboot magic %s
+sunxi sprite: uboot magic is error
+sunxi sprite: boot0 checksum is error flash_sum=0x%x
+uboot_pkg magic 0x%x
+sunxi sprite: toc magic is error
+sunxi sprite: toc1 checksum is error flash_sum=0x%x
+board=sunxi
+board_name=sunxi
+soc=sunxi
+fdtfile=sunxi/sun60iw2p1-soc-system.dtb
+u-boot,dm-pre-reloc
+u-boot,dm-spl
+u-boot,dm-tpl
+usb fastboot fail: not support sunxi fastboot
+sunxi work mode=0x%x
+sunxi usb test: invalid usb device
+sunxi flash write :offset %lx, %d bytes %s
+sunxi sprite: boot0 magic is error
+sunxi sprite: toc0 magic is error, need secure image
+do_sunxi_flash_boot0:no command
+sunxi_pwm%d
+sunxi sprite: toc0 checksum is error
+sunxi sprite: boot0 checksum is error
+sunxi video timings invalid!
+sunxi-hdmi: dw audio get acr n: %d
+sunxi-hdmi: dw audio get acr cts: %d
+sunxi-hdmi: [error] dw hdmi update control param failed
+sunxi-hdmi: dw audio unset when hdmi_on(%d) audio_on(%d)
+sunxi-hdmi: [error] dw audio check params is invalid!
+sunxi-hdmi: [warn] dw audio factor %d unsupport. use default 128 factor
+sunxi-hdmi: dw audio i2s config done!
+sunxi-hdmi: dw audio config done!
+sunxi-hdmi: [error] dvi mode but check pixel is repet!
+sunxi-hdmi: [error] invalid color remap size: %d
+sunxi-hdmi: dw video path output select: %s
+sunxi-hdmi: [error] invalid chroma interpolation filter: %d
+sunxi-hdmi: [error] invalid chroma decimation filter: %d
+sunxi-hdmi: dw video csc check interpolation: %d, decimation: %d, %dbit
+sunxi-hdmi: [error] video sampler failed when format: %d - %dbits
+sunxi-hdmi: dw video config done!
+sunxi-hdmi: [error] dw video config failed
+sunxi-hdmi: [error] dw video path config failed
+sunxi-hdmi: [warn] dw audio path config failed
+sunxi-hdmi: [warn] dw infoframe packet config failed
+sunxi-hdmi: dw avp config done
+sunxi-hdmi: [warn] sink unsupport scdc so can-not set this timing!
+sunxi-hdmi: dw avp enable scramble done
+sunxi-hdmi: dw avp disable scramble done
+sunxi-hdmi: [drm packet]
+sunxi-hdmi:  - eotf: %d, metadata: %d
+sunxi-hdmi:  - r_x: %d, r_y: %d
+sunxi-hdmi:  - g_x: %d, g_y: %d
+sunxi-hdmi:  - b_x: %d, b_y: %d
+sunxi-hdmi:  - w_x: %d, w_y: %d
+sunxi-hdmi:  - luma_max: %d, luma_min: %d, mcll: %d, mfll: %d
+sunxi-hdmi: dw drm data filling done
+sunxi-hdmi: dw edid parse block0 detailed timing:
+sunxi-hdmi: dw edid unsupport parser desc type: %d
+sunxi-hdmi: dw edid base block desc timing %d parser failed
+sunxi-hdmi:  - [dtd %d] pixel clock: %dKHz, %dx%d%s
+sunxi-hdmi: [error] edid cta 861 block version unsupport!
+sunxi-hdmi: dw edid parse: audio data block
+sunxi-hdmi: [warn] edid sad %d not save when buffer full
+sunxi-hdmi: dw edid parse: video data block
+sunxi-hdmi: [warn] edid svd %d not save when buffer full
+sunxi-hdmi: dw edid parse: hdmi14 vendor specific data block
+sunxi-hdmi: [error] dw edid parse hdmi14 vsdb failed!
+sunxi-hdmi: dw edid parse: hdmi forum vendor specific data block
+sunxi-hdmi: [error] dw edid parse hf-vsdb failed!
+sunxi-hdmi: [warn] dw edid unsupport parse ieee: 0x%X
+sunxi-hdmi: dw edid parse: speaker allocation data block
+sunxi-hdmi: [error] dw edid parse speaker allocation failed
+sunxi-hdmi: dw edid parse: extend video capability data block
+sunxi-hdmi: [error] dw edid parse vsdb failed
+sunxi-hdmi: dw edid unsupport parse hdmi video data block
+sunxi-hdmi: dw edid parse: colorimetry data block
+sunxi-hdmi: [error] dw edid pase colorimetry failed
+sunxi-hdmi: dw edid parse: hdr static metadata data block
+sunxi-hdmi: [error] dw edid parse hdr static metadata failed
+sunxi-hdmi: dw edid unsupport parse hdmi audio data block
+sunxi-hdmi: dw edid parse: ycc420 video data block
+sunxi-hdmi: dw edid set vic[%d] only support 420
+sunxi-hdmi: [warn] dw edid sct not save vic[%02d] when buffer full
+sunxi-hdmi: dw edid parse: ycc420 capability map data block
+sunxi-hdmi:  - update svd[%02d] vic[%03d] support ycc420
+sunxi-hdmi: dw edid set vic[%d] also support 420
+sunxi-hdmi: dw edid parse: hdmi forum sink capability data block
+sunxi-hdmi: dw edid unsupport parse extern data block: %d
+sunxi-hdmi: [warn] dw edid unsupport data block: %d
+sunxi-hdmi: dw edid parse not save dtd %d
+sunxi-hdmi: edid block header 0x%02x not supported
+sunxi-hdmi: [audio packet]
+sunxi-hdmi:  - channel count = %d
+sunxi-hdmi:  - channel allocation = %d
+sunxi-hdmi:  - level shift = %d
+sunxi-hdmi:  - freq number = %d
+sunxi-hdmi: dw audio packet config done!
+sunxi-hdmi: dw audio coding type %d unsupport
+sunxi-hdmi: dw audio sample config done!
+sunxi-hdmi: [error] dw i2cm set scdc read failed
+sunxi-hdmi: [error] dw scdc write scramble %s failed
+sunxi-hdmi: [error] dw i2cm set scdc write failed
+sunxi-hdmi: [error] hdmi unsupported transfer %d/%d, no data
+sunxi-hdmi: dw packet unset when dvi mode
+sunxi-hdmi: dw drm packet for hdr config done
+sunxi-hdmi: dw infoframe config done!
+sunxi-hdmi: dw hdmi mc disable all clock
+sunxi-hdmi: dw hdmi mc enable all clock
+sunxi-hdmi: [error] dw mc get clk unsupport type: %d
+sunxi-hdmi: [error] dw irq clear state unsupport irq: %d
+sunxi-hdmi: [error] dw irq get state unsupport irq: %d
+sunxi-hdmi: dw hdmi mc mask all irq
+sunxi-hdmi: [error] dw irq mute unsupport irq: %d
+sunxi-hdmi: [error] dw mc set clk unsupport type: %d
+sunxi-hdmi: dw hdmi mc %s main irq
+sunxi-hdmi: [error] dw mc sw reset unsupport type: %d
+sunxi-hdmi: [error] dw phy unsupport interface: %d
+sunxi-hdmi: dw phy config interface: %s
+sunxi-hdmi: dw phy i2m read has error!!!
+sunxi-hdmi: [error] dw phy i2cm wait read done state timeout!!!
+sunxi-hdmi: dw phy standby done
+sunxi-hdmi: [error] dw phy i2cm write has error!!!
+sunxi-hdmi: [error] dw phy i2cm wait write done state timeout!!!
+sunxi-hdmi: [disp info]
+sunxi-hdmi:  - %s mode, encoding-in: %s, encding-out: %s, %dbits
+sunxi-hdmi:  - %s mode, eotf: %s, %s-range, %s, color metry: %s
+sunxi-hdmi:    - extern color metry: %s
+sunxi-hdmi: [filling timing]
+sunxi-hdmi:  - pixel clock: %dKHz, repeat: %d, %s, ratio: %dx%d
+sunxi-hdmi:  - vic code: %d, framerate: %dHz
+sunxi-hdmi:  - hactive: %4d, hblank: %3d, hfront: %3d, hsync: %2d, hpol: %d
+sunxi-hdmi:  - vactive: %4d, vblank: %3d, vfront: %3d, vsync: %2d, vpol: %d
+sunxi-hdmi: dw video update depth: %d
+sunxi-hdmi: dw video update format: %d
+start sunxi  %s...
+sunxi %s init ok...
+stop sunxi %s ok...
+uboot.env
+sunxi_dwmac_hw_init failed: %d
+No valid device tree binary found - please append one to U-Boot binary, use u-boot-dtb.bin or define CONFIG_OF_EMBED. For sandbox, use -d <file.dtb>
+u-boot,efi-partition-entries-offset
+sunxi-hdmi: inno phy reset done
+sunxi-hdmi: [warn] inno phy wait rxsense lock timeout
+sunxi-hdmi: [warn] raw clock is %ukHz, change use min ref clock %ukHz
+sunxi-hdmi: raw clock is %ukHz, change use near ref clock %ukHz
+sunxi-hdmi: [error] inno phy clock %uHz auto approach mode failed!
+sunxi-hdmi: inno phy mpll use table[%d]
+sunxi-hdmi: [error] inno phy get mpll failed when tmds clock %dKHz, ref clock %dKHz
+sunxi-hdmi: [error] inno phy con not get mpll table
+sunxi-hdmi: [error] inno phy mpll config failed
+sunxi-hdmi: [error] inno phy wait pre-pll and post-pll lock timeout
+sunxi-hdmi: inno phy tmds clock: %dKHz match in [%dKHz~%dKHz]
+sunxi-hdmi:  - drive use: 0x%08x, 0x%08x, 0x%08x, 0x%08x
+sunxi-hdmi: [error] inno phy not config electrical
+sunxi-hdmi: [error] inno phy config drive failed
+sunxi-hdmi: inno phy config done!
+sunxi-hdmi: [error] inno phy config failed!!!
+sunxi-hdmi: dw phy wait pll: %s
+sunxi-hdmi: inno phy init
+sunxi-hdmi: inno phy not get table from dts, use default
+sunxi-hdmi: [error] inno phy alloc buffer failed
+sunxi-hdmi: [error] inno phy get dts table value failed
+sunxi-hdmi: [warn] inno phy use default table!
+sunxi-hdmi:  - [%d - %d]: 0x%08X, 0x%08X, 0x%08X, 0x%08X
+sunxi_secstorage_read fail
+sunxi-pwms
+sunxi-hdmi: [warn] snps phy check clk: %dHz is too low and change use: %dHz
+sunxi-hdmi: [warn] snps phy check clk: %dHz is too max and change use: %dHz
+sunxi-hdmi: [warn] snps phy check clk: %dHz is match in [%dHz-%dHz] and change use: %dHz
+sunxi-hdmi: [snps phy]
+sunxi-hdmi:  - refer clock: %dKHz, color bits: %d, repeat: %d
+sunxi-hdmi:     - mpll: 0x%04x, 0x%04x, 0x%04x
+sunxi-hdmi: [error] snps phy config mpll failed
+sunxi-hdmi:  - refer clock: %dKHz. [%dKHz~%dKHz]
+sunxi-hdmi:     - drive: 0x%04x, 0x%04x, 0x%04x
+sunxi-hdmi: [error] snps phy check clock %dHz unmatch in table!
+sunxi-hdmi: [error] snps phy config drive failed
+sunxi-hdmi: snps phy state: %s
+sunxi-hdmi: [error] dw phy standby failed
+sunxi-hdmi: [error] snps phy unsupport plat id: %d
+sunxi-hdmi: snps phy not get table from dts, use default
+sunxi-hdmi: [error] snps phy alloc buffer failed
+sunxi-hdmi: [error] snps phy get dts table value failed
+sunxi-hdmi: snps phy dts:
+sunxi-hdmi:  - line[%d]: [%d ~ %d], 0x%04x, 0x%04x, 0x%04x
+spi sunxi_slave->max_hz:%d
+sunxi sprite error : read dl map failed
+sunxi sprite error : read mbr failed
+sunxi cartoon error: invalid screen width or height
+sunxi sprite error: donn't download dl_map
+recovery error : download uboot or boot0 error!
+successed in downloading uboot and boot0
+sunxi_axp
+sunxi_axp sub-system
+sunxi_axp <pmu/bmu> <read> <reg_addr>
+sunxi_axp <pmu/bmu> <write> <reg_addr> <reg_value>
+sunxi_mem_info_dump
+sunxi_cmd_parser
+sunxi cmdline parser test
+print monitor, compiler and linker version
+sunxi_card0_probe
+probe sunxi card0 device
+default-arm-sunxi
+sunxi_flash sub-system
+sunxi_flash read mem_addr part_name [size]
+sunxi_flash read_mtd mem_addr part_name [size]
+sunxi_flash write <mem_addr> <part_name> [size]
+sunxi_flash write <mem_addr> <part_name> [offset] [size]
+sunxi_flash write_mtd <mem_addr> <part_name>
+sunxi_flash boot0 force_dram_update_size <new_val>
+sunxi_flash boot0 force_dram_update_flag <new_val>
+sunxi_pwm
+sunxi_ab_test
+enable test for uboot ab select feature
+sunxi_drm
+sunxi drm debug cmd
+sunxi_backlihgt
+sunxi_show_bmp
+sunxi_display
+allwinner,sunxi-drm
+sunxi_drm_lvds
+sunxi_drm_dsi
+sunxi_hdmi20
+sunxi drm hdmi debug cmd
+sunxi_drm_hdmi
+allwinner,sunxi-hdmi
+sunxi_lvds
+sunxi-lvds
+sunxi_dsi_combo_phy
+allwinner,sunxi-dsi-combo-phy0
+allwinner,sunxi-dsi-combo-phy1
+allwinner,sunxi-dsi-combo-phy0,sun55iw6
+allwinner,sunxi-dsi-combo-phy0,sun60iw2
+allwinner,sunxi-dsi-combo-phy1,sun60iw2
+allwinner,sunxi-dsi-combo-phy0,sun65iw1
+sunxi_r_i2c0
+allwinner,sunxi-gmac
+uboot_start
+uboot_size
+uboot_bak_start
+uboot_bak_size
+/soc/sunxi_flashmap/nor_map
+/soc/sunxi_flashmap/sdmmc_map
+sunxi_so
+sunxi_so sub-system
+sunxi_so <cmd>
+sunxi sprite begin
+sunxi sprite firmware probe fail
+sunxi sprite error : fetch download map error
+sunxi sprite error : fetch mbr error
+sunxi sprite error: erase flash err
+sunxi sprite error: download mbr err
+sunxi sprite error : download part error
+sunxi sprite error : download uboot error
+sunxi sprite error : download boot0 error
+sunxi_sprite_error : read boot0 head failed
+sunxi_sprite_error : can not write boot0 head into card
+sunxi_de_enable failed
+sunxi_de_event_proc FAILED!
+[SUNXI-DE]WARN:sunxi has NOT been enable
+[SUNXI-DE]WARN:sunxi has been enable
+Get sunxi drm device fail!
+sunxi display engine fail to get match data
+sunxi secure storage write failed
+The sunxi dma version = 0, please check the error!
+allocate memory for sunxi_crtc fail
+sunxi plane init for %d fail
+get_sunxi_drm_connector_by_device fail!
+logo,uboot
+sunxi-hdmi: hdmi devices probe start >>>>>>>>>>
+sunxi-hdmi: [error] sunxi hdmi init get tcon device failed
+sunxi-hdmi: [error] sunxi hdmi init drv fail
+sunxi-hdmi: hdmi devices probe end <<<<<<<<<<
+sunxi-hdmi: [error] sunxi hdmi probe failed!!!!!
+/soc/sunxi-drm
+sunxi-iova-premap
+sunxi_tcon_parse_dts failed
+sunxi usb efex err: unable to malloc memory for cmd
+sunxi usb efex err: unable to malloc memory for efex receive
+sunxi usb efex err: unable to malloc memory for efex send
+sunxi usb err: unknown ep0 req in efex
+sunxi usb err: unknown non standard ep0 req
+sunxi usb err: string line %d is not supported
+sunxi efex error: standard req is not supported
+sunxi usb error: the cbw signature 0x%x is bad, need 0x%x
+sunxi usb error: the cmd signature 0x%x is bad, need 0x%x
+sunxi usb error: received bytes 0x%x is not equal cbw struct size 0x%zx or new cmd size 0x%x
+sunxi usb efex app cmd err: usb transfer direction is receive only
+sunxi usb efex app status err: usb transfer direction is transmit only
+sunxi usb efex err: received cmd size 0x%x is not equal to CBW_MAX_CMD_SIZE 0x%x
+sunxi usb efex err: write flash from 0x%x, sectors 0x%x failed
+sunxi usb cmd error: 0x%x
+sunxi usb trans error: the request data length is 0
+sunxi usb next status set error:0x%x
+[sunxi_efuse_write] error: unknow key
+[sunxi_efuse_write] error: NO ACCESS
+sunxi flash type@%d not support fast burn key
+sunxi flash hook init fail
+sunxi_fastboot_exit
+sunxi_fastboot_init
+sunxi usb fastboot err: unable to malloc memory for fastboot send
+sunxi fastboot error: standard req is not supported
+sunxi_usb_fastboot_status=%d
+sunxi-package
+sunxi-secure
+sunxi fastboot error: there is not sunxi-package/toc1 file
+sunxi fastboot error: check toc1 root key fail
+sunxi fastboot: successed in downloading uboot package
+sunxi fastboot: successed in downloading toc1
+sunxi fastboot: fail in downloading uboot package
+sunxi fastboot: fail in downloading toc1
+sunxi fastboot error: there is not boot0 file
+sunxi fastboot error: there is not toc0 file
+sunxi fastboot: successed in downloading boot0/toc0
+sunxi fastboot: fail in downloading boot0/toc0
+sunxi fastboot: mbr verify fail
+sunxi fastboot error: download mbr err
+sunxi fastboot: successed in downloading mbr
+sunxi fastboot download FAIL: partition %s does not exist
+sunxi fatboot download FAIL: it is not a dram address
+sunxi fastboot download FAIL: failed to write partition %s
+sunxi fastboot download FAIL: partition %s size 0x%x is smaller than data size 0x%x
+sunxi fastboot: successed in downloading partition '%s'
+sunxi flash read :offset %x, %d bytes %s
+sunxi flash init ok
+%s: write main uboot failed
+%s: write back uboot failed
+sunxi_flash_mmc_phyread backup fail
+sunxi_flash_mmc_phyread fail
+sunxi_flash_mmc_phywrite backup fail
+sunxi flash map init
+FDT sunxi flash disable
+sunxi deal with hdcp key failed
+sunxi-hdmi: [error] sunxi hdmi phy disconfig failed
+sunxi-hdmi: [error] sunxi hdmi avp config failed
+sunxi-hdmi: [error] sunxi hdmi top phy config failed
+sunxi-hdmi: [error] sunxi hdmi ext phy config failed
+sunxi-hdmi: sunxi hdmi config done
+sunxi-hdmi: [error] hdmi edid parse block0 failed
+sunxi-hdmi: sunxi hdmi edid parse block0 finish
+sunxi-hdmi: hdmi edid only has block0 and parse finish
+sunxi-hdmi: [error] hdmi edid parse block%d failed
+sunxi-hdmi: sunxi hdmi edid parse block%d finish
+sunxi-hdmi: [error] failed to find root node
+sunxi-hdmi: [error] failed to read root node compatible value
+sunxi-hdmi: this plat not need use resistance calibration
+sunxi-hdmi: [error] dw dev init failed
+sunxi-hdmi: [error] top phy init failed
+[mmc]: sunxi mmc host init failed!
+[mmc]: get sdly from uboot header fail
+sunxi keybox read env failed with:%d
+sunxi keybox install failed with:%d
+sunxi secure storage is not supported
+sunxi secure storage has no flag
+uboot2018:2024-10-18 9:01:00 -- uboot2018:2025-03-28 10:03:00
+[mmc]: sunxi host mmc config failed!
+[mmc]: sunxi mmc pin set failed!
+line:%d:sunxi_flash_read fail
+sunxi usb pburn err: unable to malloc memory for pburn receive
+sunxi usb pburn err: unable to malloc memory for pburn send
+sunxi usb err: unknown ep0 req in pburn
+sunxi pburn error: standard req is not supported
+sunxi usb error: received bytes 0x%x is not equal cbw struct size 0x%x
+sunxi burn flag failed
+sunxi erase key failed
+sunxi erase all key success
+sunxi flash write err: start,0x%x sectors 0x%x
+	 sunxi_usb_efex_app_step:
+	 sunxi_usb_efex_status:
+sunxi_flash
+failed to display uboot logo for disp %d
+sunxi sprite: no part need to write
+sunxi sprite err: unable to malloc memory for sunxi_sprite_deal_part
+sunxi sprite error: download_udisk, the flash size is invalid(0)
+sunxi sprite error: __download_udisk, close udisk image failed
+sunxi sprite err: sunxi_sprite_deal_part, download_udisk failed
+sunxi sprite err: sunxi_sprite_deal_part, download sysrecovery failed
+line:%d sunxi sprite err: sunxi_sprite_deal_part, download private failed
+sunxi sprite err: sunxi_sprite_deal_part, download normal failed
+successed in downloading uboot
+sunxi_sprite_deal_recorvery_boot ok
+sprite update error: fail to open uboot item
+sprite update error: fail to get uboot item size
+update error: fail to read data from for uboot
+update error: fail to write uboot
+sunxi_sprite_deal_uboot ok
+uboot size = 0x%x
+sunxi sprite pre init fail
+sunxi sprite err: unable to malloc memory for verify
+sunxi sprite: read flash error when verify
+sunxi sprite error : write private data error
+sunxi_tcon_lcd_set_clk failed
+sunxi_tcon_lcd_prepare failed
+sunxi_of_graph_get_remote_node fail!
+sunxi_of_graph_get_port_parent fail!
+[TCON] sunxi_tcon_probe start
+[TCON] sunxi_tcon_probe ret = %d
+sunxi_tcon_top fail to get match data
+sunxi flash read err: start,0x%x sectors 0x%x
+sunxi usb err: fail to init usb device
+sunxi usb err : USBC_open_otg failed
+sunxi usb err : unable to request dma for usb send data
+sunxi usb err : unable to request dma for usb receive data
+sunxi usb err: read_request failed
+sunxi usb err: unknown usb out request to device
+sunxi ubs read error: usb rx ep is busy already
+sunxi-hdmi: not-config phy pll when use ccmu mode
+sunxi-hdmi: [top phy]
+sunxi-hdmi:  - %dKHz, %s clock
+sunxi-hdmi:    - pll: 0x%08X, 0x%08X, 0x%08X, 0x%08X
+sunxi-hdmi: [error] top phy wait pll lock timeout
+sunxi-hdmi: top phy config done
+sunxi-hdmi: [error] top phy get plat id [%d] data failed
+sunxi-hdmi: top phy pll output gate: %s
+sunxi-hdmi: top phy power: %s
+sunxi-hdmi: top phy output clock from: %s
+sunxi_drm dump - Print state and reg value
+sunxi_drm colorbar [type] - Set clock frequency
+sunxi_drm wb - Online Writeback image to boot-resource partition
+allwinner,sunxi-pwm
+allwinner,sunxi-pwm0
+allwinner,sunxi-pwm1
+allwinner,sunxi-pwm2
+allwinner,sunxi-pwm3
+allwinner,sunxi-pwm4
+allwinner,sunxi-pwm5
+allwinner,sunxi-pwm6
+allwinner,sunxi-pwm7
+allwinner,sunxi-pwm8
+allwinner,sunxi-pwm9
+allwinner,sunxi-pwm
+allwinner,sunxi-pwm10
+allwinner,sunxi-pwm11
+allwinner,sunxi-pwm12
+allwinner,sunxi-pwm13
+allwinner,sunxi-pwm14
+allwinner,sunxi-pwm15
+allwinner,sunxi-pwm16
+allwinner,sunxi-pwm17
+allwinner,sunxi-pwm18
+allwinner,sunxi-pwm19
+allwinner,sunxi-pwm
+allwinner,sunxi-pwm20
+allwinner,sunxi-pwm21
+allwinner,sunxi-pwm22
+allwinner,sunxi-pwm23
+allwinner,sunxi-pwm24
+allwinner,sunxi-pwm25
+allwinner,sunxi-pwm26
+allwinner,sunxi-pwm27
+allwinner,sunxi-pwm28
+allwinner,sunxi-pwm29
+allwinner,sunxi-pcie-v300-rc
+sunxi-drm
+allwinner,sunxi-drm
+allwinner,sunxi-dsi-combo-phy0,sun60iw2
+allwinner,sunxi-dsi-combo-phy1,sun60iw2
+allwinner,sunxi-hdmi
+allwinner,sunxi-gmac
+allwinner,sunxi-gmac
+sunxi-lvds
+sunxi-lvds
+sunxi-pwms
+logo,uboot
+sunxi_usb_dev_register
+sunxi usb err: fail to init usb device
+sunxi usb err : USBC_open_otg failed
+sunxi usb err : unable to request dma for usb send data
+sunxi usb err : unable to request dma for usb receive data
+sunxi_usb_main_loop
+sunxi usb err: read_request failed
+sunxi usb err: unknown usb out request to device
+sunxi ubs read error: usb rx ep is busy already
+sunxi usb err: unknown ep0 req in efex
+sunxi usb err: unknown non standard ep0 req
+sunxi efex error: standard req is not supported
+sunxi_efex_next_action=%d
+sunxi usb error: the cbw signature 0x%x is bad, need 0x%x
+sunxi usb error: the cmd signature 0x%x is bad, need 0x%x
+sunxi usb error: received bytes 0x%x is not equal cbw struct size 0x%zx or new cmd size 0x%x
+sunxi usb efex app cmd err: usb transfer direction is receive only
+sunxi usb efex app status err: usb transfer direction is transmit only
+sunxi usb efex err: received cmd size 0x%x is not equal to CBW_MAX_CMD_SIZE 0x%x
+sunxi usb cmd error: 0x%x
+sunxi usb trans error: the request data length is 0
+sunxi usb next status set error:0x%x
+plat/allwinner/common/sunxi_bl31_setup.c
+[SCP] :sunxi-arisc driver is starting
+plat/allwinner/common/sunxi_amu_helper.S

@@ -46,8 +46,7 @@ ARM GICv3 (`compatible = "arm,gic-v3"`):
 - Redistributor: `0x03460000` (size `0xc0000`)
 - `interrupt-cells = 3`
 
-The existing `arm64/gic.c` should work directly — same register interface
-as the QEMU virt GICv3.
+The port currently uses a local `gic.c` override for A733 mapping/bring-up, while still following the standard GICv3 register model used by the shared arm64 code.
 
 ## PCIe
 
@@ -63,10 +62,12 @@ This appears to be a DesignWare PCIe core — same IP as many other SoCs.
 
 ## Boot Chain
 
-Allwinner custom: `boot0` (SPL) → U-Boot → kernel
-- boot0 loads from SD/eMMC/SPI-NOR/UFS
+Allwinner custom: `boot0` (SPL) → ATF/BL31 → vendor U-Boot → `boot.scr` → 9front kernel wrapper.
+
+- `boot0` loads from SD/eMMC/SPI-NOR/UFS
 - U-Boot uses dragon/sunxi tools for packaging
-- Kernel loaded as uImage at configurable address
+- The SD builder wraps `9a733.u` in a minimal AArch64 Linux `Image` header so vendor U-Boot can launch it with `booti`
+- The vendor DTB is loaded at `0x43000000` and passed in `x0`; early DTB parsing is currently bypassed in favor of board-known fallbacks until pid1 bring-up is stable
 
 ## Design Decisions
 
@@ -75,12 +76,18 @@ Allwinner custom: `boot0` (SPL) → U-Boot → kernel
    the Allwinner UART is purely MMIO. Simpler to write a clean MMIO
    driver from scratch than adapt the port I/O abstractions.
 
-2. **Shared arm64 code**: Reuse `cache.v8.s`, `clock.c`, `fpu.c`,
-   `gic.c`, `mmu.c`, `sysreg.c`, `trap.c` directly from `arm64/`.
-   The A733 uses standard ARM IP for all of these.
+2. **Shared arm64 code**: Reuse `cache.v8.s`, `fpu.c`, `mmu.c`, and
+   `sysreg.c` directly from `arm64/`. Local A733 overrides now exist for
+   `clock.c`, `gic.c`, `main.c`, `mem.c`, `page.c`, `proc.c`, `trap.c`,
+   and `userinit.c` while bring-up is still instrumented.
 
-3. **PCIe**: Will need a new `pciaw.c` for the DesignWare PCIe init.
+3. **Bootstrap strategy**: Keep all effective bring-up overrides under
+   `port/a733/`, because the automated QEMU rebuild copies only that tree into
+   `/sys/src/9/a733` before running `mk`.
+
+4. **PCIe**: Will need a new `pciaw.c` for the DesignWare PCIe init.
    Once PCIe works, NVMe (`port/sdnvme.c`) and XHCI USB come for free.
 
-4. **Initial target**: Serial console boot to `rc` shell via UART0.
-   Storage via USB (XHCI) initially, PCIe/NVMe later.
+5. **Initial target**: Get pid1 through the first EL0 fault-return/syscall path
+   and onward to `/boot/boot` via UART0. Storage via USB (XHCI) initially,
+   PCIe/NVMe later.

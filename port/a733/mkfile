@@ -105,8 +105,8 @@ init9.$O:	../arm64/init9.s
 	$AS -I. ../arm64/init9.s
 
 # Shared arm64 C
-clock.$O:	../arm64/clock.c
-	$CC $CFLAGS -I. ../arm64/clock.c
+clock.$O:	clock.c
+	$CC $CFLAGS -I. clock.c
 
 fpu.$O:	../arm64/fpu.c
 	$CC $CFLAGS -I. ../arm64/fpu.c
@@ -120,14 +120,23 @@ mmu.$O:	../arm64/mmu.c
 mem.$O:	mem.c
 	$CC $CFLAGS -I. mem.c
 
+page.$O:	page.c
+	$CC $CFLAGS -I. page.c
+
+proc.$O:	proc.c
+	$CC $CFLAGS -I. -I../port proc.c
+
+userinit.$O:	userinit.c
+	$CC $CFLAGS -I. userinit.c
+
 main.$O:	main.c
 	$CC $CFLAGS -I. main.c
 
 sysreg.$O:	../arm64/sysreg.c
 	$CC $CFLAGS -I. ../arm64/sysreg.c
 
-trap.$O:	../arm64/trap.c
-	$CC $CFLAGS -I. ../arm64/trap.c
+trap.$O:	trap.c
+	$CC $CFLAGS -I. trap.c
 
 bootargs.$O:	bootargs.c
 	$CC $CFLAGS -I. bootargs.c

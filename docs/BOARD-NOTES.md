@@ -1,6 +1,6 @@
 # Orange Pi 4 Pro (A733) — Board Notes
 
-Source: OrangePi_4_Pro_A733_User Manual_v1.4.pdf (18MB, in workspace root)
+Source: `docs/OrangePi_4_Pro_A733_User Manual_v1.4.pdf` (18 MB vendor manual snapshot).
 
 ## SoC & CPU
 
