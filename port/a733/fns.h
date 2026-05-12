@@ -74,6 +74,7 @@ extern void kmapram(uintptr, uintptr);
 extern void* vmap(uvlong, vlong);
 extern void vunmap(void*, vlong);
 extern void mmu1init(void);
+extern void mmuswitch(Proc*);
 extern void putasid(Proc*);
 
 /* mem */

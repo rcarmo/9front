@@ -28,7 +28,7 @@ dumppid1stackwalk(uintptr addr)
 	Pte *ptab;
 	Page *pg;
 	uintptr off, top;
-	int i;
+	int i, x, spl;
 
 	if(up == nil || up->pid != 1 || pid1stackwalkdump++ != 0)
 		return;
@@ -41,11 +41,25 @@ dumppid1stackwalk(uintptr addr)
 	off = addr - s->base;
 	ptab = s->map[off/PTEMAPMEM];
 	pg = ptab != nil ? ptab->pages[(off&(PTEMAPMEM-1))/BY2PG] : nil;
-	top = m->mmutop[PTLX(addr, PTLEVELS-1)];
+	x = PTLX(addr, PTLEVELS-1);
+	top = m->mmutop[x];
 	iprint("pid1 walk addr %#p seg[%#p,%#p) ptab %#p pg %#p pa %#p top[%d] %#p\n",
-		addr, s->base, s->top, ptab, pg, pg != nil ? pg->pa : 0, PTLX(addr, PTLEVELS-1), top);
+		addr, s->base, s->top, ptab, pg, pg != nil ? pg->pa : 0, x, top);
 	for(i = 0, t = up->mmuhead[PTLEVELS-1]; t != nil && i < 8; t = t->next, i++)
 		iprint("pid1 mmuhead[%d] va %#p pa %#p next %#p\n", i, t->va, t->pa, t->next);
+
+	/*
+	 * If the proc-owned top-level table chain exists but the live per-CPU
+	 * shadow has lost the matching entry, force a one-shot refresh before the
+	 * first EL0 fault return. This distinguishes a bad leaf mapping from a stale
+	 * m->mmutop install path and may let pid1 reach its first syscall.
+	 */
+	if(top == 0 && up->mmuhead[PTLEVELS-1] != nil){
+		spl = splhi();
+		mmuswitch(up);
+		splx(spl);
+		iprint("pid1 mmuswitch refresh top[%d] %#p\n", x, m->mmutop[x]);
+	}
 }
 
 void

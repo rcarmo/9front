@@ -225,7 +225,7 @@ The latest hardware log confirms those overrides are active: scheduler handoff, 
 
 ### A. First EL0 fault-return/syscall path
 
-The current hardware log resolves pid1's first user stack write fault and reaches the trap-exit path (`pid1 ureg preexit ... psr 0x80`), but no first `pid1 syscall[...]` trace has been captured yet. This is now the primary live gap.
+The current hardware log resolves pid1's first user stack write fault and reaches the trap-exit path (`pid1 ureg preexit ... psr 0x80`), but no first `pid1 syscall[...]` trace has been captured yet. The current A733 diagnostic does a one-shot `mmuswitch(up)` refresh if `m->mmutop[PTLX(addr, PTLEVELS-1)]` is nil while the process-owned `up->mmuhead[PTLEVELS-1]` chain exists, then prints `pid1 mmuswitch refresh top[...] ...`. This is now the primary live gap.
 
 ### B. Early DTB parser re-enable
 
@@ -252,6 +252,7 @@ The current best understanding is:
 - the Linux-shaped CPU setup / MMU enable split is validated on hardware
 - broadening the early TTBR1 direct map fixed the `pageinit()` / `xalloc()` cliff
 - the system now reaches pid1, enters EL0, and resolves its first user stack write fault
+- the current diagnostic tests whether the live per-CPU `m->mmutop` shadow must be refreshed from `up->mmuhead[PTLEVELS-1]` before returning from that fault
 - the remaining primary gap is the first EL0 fault-return/syscall path, not the original MMU-enable transition
 
 ## Artifact tree

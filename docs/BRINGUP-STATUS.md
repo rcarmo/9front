@@ -58,6 +58,7 @@ ABCDE120345FGHIJKLMaboNOPQRSTZ5567890rs1234tuiI...JUvwxy[]...}kl...mnoABCDEFGHIp
 
 The next useful movement is either:
 
+- a new `pid1 mmuswitch refresh top[255] ...` line from the one-shot A733 diagnostic, proving the process-owned top-level page-table chain can repopulate the live `m->mmutop` entry before EL0 fault return;
 - a pid1 syscall trace (`pid1 syscall[...]`) from `trap.c`, proving the first fault-return path resumed user code successfully; or
 - a trap/panic after the recorded `pid1 ureg preexit ...`, proving the remaining fault is in the EL0 return path, user page tables, TOS accounting, or early timer/preemption interaction.
 
@@ -347,7 +348,8 @@ So the 9front A733 bring-up should continue assuming 4KB pages / 3-level page ta
 ## Recommended next debugging direction
 
 1. Rebuild the current instrumented image and retest on hardware.
-2. Look specifically for a `pid1 syscall[...]` line after the resolved `pid1 fault[0]`; that is the next sign that EL0 fault return is working.
-3. If the system still goes quiet after `pid1 ureg preexit ... psr 0x80`, inspect the final `kexit()` / `fpukexit()` / `ERET` path and the freshly populated pid1 user page tables rather than revisiting early MMU setup.
-4. Keep IRQ delivery conservative until the first syscall is visible; the current `trap.c` path masks pid1 IRQs before first syscall to separate timer preemption from user fault return.
-5. Defer framebuffer/video, PCIe, storage, and network work until pid1 reliably reaches `/boot/boot` syscalls.
+2. Look specifically for `pid1 mmuswitch refresh top[255] ...` after the resolved `pid1 fault[0]`; if that line prints a non-zero top entry, the live per-CPU top-level install path was stale even though `up->mmuhead[PTLEVELS-1]` was correct.
+3. Then look for a `pid1 syscall[...]` line after the refresh / resolved fault; that is the next sign that EL0 fault return is working.
+4. If the system still goes quiet after `pid1 ureg preexit ... psr 0x80`, inspect the final `kexit()` / `fpukexit()` / `ERET` path and the freshly populated pid1 user page tables rather than revisiting early MMU setup.
+5. Keep IRQ delivery conservative until the first syscall is visible; the current `trap.c` path masks pid1 IRQs before first syscall to separate timer preemption from user fault return.
+6. Defer framebuffer/video, PCIe, storage, and network work until pid1 reliably reaches `/boot/boot` syscalls.
